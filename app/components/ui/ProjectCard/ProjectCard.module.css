@@ -1,0 +1,99 @@
+.card {
+  display: block;
+  text-decoration: none;
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+}
+
+/* IMAGE */
+.imageWrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  aspect-ratio: 4/3;
+}
+
+/* IMAGE */
+.image {
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card:hover .image {
+  transform: scale(1.06);
+}
+
+/* OVERLAY */
+.overlay {
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.55),
+    rgba(0, 0, 0, 0.1),
+    transparent
+  );
+
+  display: flex;
+  align-items: flex-end;
+
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card:hover .overlay {
+  opacity: 1;
+}
+
+/* PRICE */
+.price {
+  padding: 18px;
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+
+  transform: translateY(10px);
+  transition: 0.3s ease;
+}
+
+.card:hover .price {
+  transform: translateY(0);
+}
+
+/* STATUS BADGE */
+.status {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+
+  background: #c9a96e;
+  color: white;
+
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 8px;
+
+  letter-spacing: 0.3px;
+}
+
+/* INFO */
+.info {
+  margin-top: 14px;
+}
+
+.info h3 {
+  font-weight: 700;
+  color: #111;
+  font-size: 1.05rem;
+  margin-bottom: 4px;
+}
+
+.info p {
+  font-size: 0.9rem;
+  color: #777;
+}

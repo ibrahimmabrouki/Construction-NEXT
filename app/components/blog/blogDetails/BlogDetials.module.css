@@ -1,0 +1,74 @@
+.article {
+  padding: 80px 0;
+}
+
+.container {
+  width: min(800px, 90%);
+  margin: 0 auto;
+}
+
+/* Category */
+.category {
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+/* Title */
+.title {
+  font-size: 2.6rem;
+  font-weight: 800;
+  margin: 10px 0 10px;
+  line-height: 1.2;
+}
+
+/* Date */
+.date {
+  color: #888;
+  margin-bottom: 40px;
+  font-size: 0.9rem;
+}
+
+/* Content */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.content p {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #444;
+}
+
+/* Footer */
+.footer {
+  margin-top: 60px;
+  padding-top: 30px;
+  border-top: 1px solid #eee;
+}
+
+/* Button */
+.backBtn {
+  display: inline-block;
+  padding: 10px 18px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.backBtn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* Not found */
+.notFound {
+  text-align: center;
+  padding: 100px 20px;
+}

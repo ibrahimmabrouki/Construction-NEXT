@@ -1,26 +1,36 @@
-// services/userService.ts
-import User from "@/models/user";
+import { NextRequest, NextResponse } from "next/server";
 
-//get all users
-export async function getUsers() {
-  return await User.find();
-}
+//this first middleware is used in order to make sure that the user has active session and
+//his/her cookie still valid and not expired.
+//it will first look into the cookie session that is sent by the client implicitly, then if session available it means that it is still not expired,
+//then we will parse the session to get the user that is offered this cookie upon login. this user will be returned. to be used in the next middleware.
 
-//create user
-export async function createUser(data: any) {
-  return await User.create(data);
-}
+export const authenticateUser = async (request: NextRequest) => {
+  const session = request.cookies.get("session");
 
-//update the user 
-export async function updateUser(userId: string, username: string) {
-  return await User.findByIdAndUpdate(
-    userId,
-    { username },
-    { new: true }
-  );
-}
+  if (!session) return null;
 
-//delete the user
-export async function deleteUser(userId: string) {
-  return await User.findByIdAndDelete(userId);
+  try {
+    const user = JSON.parse(session.value);
+    return user;
+  } catch (error) {
+    return null;
+  }
+};
+
+//this is the second middleware, this middleware is used to make sure that the API assigned this middleware allowed to be 
+//accessed by the users who have the same roles passed as parameters.
+
+export const authorizeRoles = (user: any, allowedRoles: string[]) => {
+  if (!user || !user.roles) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  const userRoles = user.roles;
+  const hasRole = allowedRoles.some((role)=> userRoles.includes(role));
+
+  if (!hasRole) {
+    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+  }
+  return null; 
 }

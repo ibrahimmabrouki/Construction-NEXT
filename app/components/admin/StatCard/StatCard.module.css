@@ -1,0 +1,89 @@
+.card {
+  background: linear-gradient(
+    135deg,
+    rgba(194, 160, 99, 0.18) 0%,
+    rgba(194, 160, 99, 0.08) 100%
+  );
+  border: 1px solid rgba(194, 160, 99, 0.25);
+  border-radius: 16px;
+  padding: 20px 22px 22px;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* subtle inner glow */
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(194, 160, 99, 0.5),
+    transparent
+  );
+}
+
+.card:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(194, 160, 99, 0.26) 0%,
+    rgba(194, 160, 99, 0.12) 100%
+  );
+  border-color: rgba(194, 160, 99, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(194, 160, 99, 0.15);
+}
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.iconWrap {
+  width: 36px;
+  height: 36px;
+  background: rgba(194, 160, 99, 0.2);
+  border: 1px solid rgba(194, 160, 99, 0.3);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b8862a;
+}
+
+.change {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #27ae60;
+  background: rgba(39, 174, 96, 0.1);
+  border: 1px solid rgba(39, 174, 96, 0.2);
+  padding: 3px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.label {
+  font-size: 0.82rem;
+  color: rgba(160, 119, 46, 0.8);
+  font-weight: 500;
+  margin: 0 0 6px;
+}
+
+.value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0;
+  letter-spacing: -0.5px;
+}

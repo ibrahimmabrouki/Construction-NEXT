@@ -1,0 +1,261 @@
+.manager {
+  background: #ffffff;
+  border: 1px solid #f0ede8;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f5f2ee;
+}
+
+.header h2 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #111;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.78rem;
+  color: #bbb;
+  margin-top: 2px;
+}
+
+.addBtn {
+  padding: 10px 20px;
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.addBtn:hover {
+  opacity: 0.9;
+}
+
+.form {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f5f2ee;
+  background: #faf9f7;
+}
+
+.form h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: #111;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fieldGroup label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.fieldGroup input,
+.fieldGroup select,
+.fieldGroup textarea {
+  padding: 9px 12px;
+  border: 1px solid #e8e4de;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  background: white;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.fieldGroup input:focus,
+.fieldGroup select:focus,
+.fieldGroup textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(194, 160, 99, 0.12);
+}
+
+.fieldGroup textarea {
+  resize: vertical;
+}
+
+.slugPreview {
+  font-size: 0.78rem;
+  color: #aaa;
+  margin-bottom: 12px;
+}
+
+.slugPreview code {
+  background: #f0ede8;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.formActions {
+  display: flex;
+  gap: 10px;
+}
+
+.saveBtn {
+  padding: 9px 20px;
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancelBtn {
+  padding: 9px 20px;
+  background: transparent;
+  color: #666;
+  border: 1px solid #e0dbd4;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 560px;
+}
+
+.table th {
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #bbb;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 24px;
+  background: #faf9f7;
+  border-bottom: 1px solid #f5f2ee;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 14px 24px;
+  font-size: 0.875rem;
+  color: #333;
+  border-bottom: 1px solid #f9f7f4;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+.table tr:hover td {
+  background: #faf9f7;
+}
+
+.primaryCell {
+  display: block;
+  font-weight: 600;
+  color: #111;
+}
+
+.slugCell {
+  display: block;
+  font-size: 0.72rem;
+  color: #ccc;
+  margin-top: 2px;
+}
+
+.dateCell {
+  font-size: 0.82rem;
+  color: #aaa;
+  white-space: nowrap;
+}
+
+.excerptCell {
+  font-size: 0.82rem;
+  color: #888;
+  max-width: 240px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  background: #f0ede8;
+  color: #a0772e;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.editBtn {
+  padding: 5px 14px;
+  border: 1px solid #e0dbd4;
+  background: white;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #555;
+}
+
+.editBtn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.deleteBtn {
+  padding: 5px 14px;
+  border: 1px solid #fdd;
+  background: white;
+  color: #c0392b;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.deleteBtn:hover {
+  background: #fdd;
+}
+
+@media (max-width: 768px) {
+  .fields {
+    grid-template-columns: 1fr;
+  }
+}

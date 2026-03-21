@@ -5,7 +5,7 @@ import {
   createUser,
   updateUser,
   deleteUser,
-} from "@/services/userServices";
+} from "@/server-services/userServices";
 import connect from "@/lib/db";
 
 // GET

@@ -1,0 +1,142 @@
+.section {
+  width: min(1200px, 90%);
+  margin: 0 auto;
+  padding: 80px 0;
+}
+
+/* Layout */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: start;
+}
+
+/* LEFT SIDE */
+.label {
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.subtitle {
+  color: #555;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+/* Contact Info */
+.contactList {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.contactItem {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  color: var(--color-accent);
+  margin-top: 4px;
+}
+
+.itemLabel {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.itemValue {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* FORM CARD (modern look) */
+.formCard {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 14px;
+  border: 1px solid #eee;
+
+  /* subtle luxury shadow */
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+}
+
+/* Form */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Inputs */
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inputGroup label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.inputGroup input,
+.inputGroup textarea {
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+/* Focus effect (premium feel) */
+.inputGroup input:focus,
+.inputGroup textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(194, 160, 99, 0.2);
+}
+
+/* Button */
+.button {
+  margin-top: 10px;
+  padding: 14px;
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .formCard {
+    padding: 30px;
+  }
+}

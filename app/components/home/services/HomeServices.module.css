@@ -1,0 +1,63 @@
+.section {
+  padding: 70px 0; /* 🔥 reduced spacing (fix your issue) */
+  background: #f7f7f5;
+}
+
+.container {
+  width: min(1200px, 90%);
+  margin: 0 auto;
+}
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px; /* 🔥 tighter spacing */
+}
+
+/* Card */
+.card {
+  background: white;
+  padding: 26px;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  transition: all 0.3s ease;
+}
+
+/* Hover effect (premium feel) */
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.07);
+}
+
+/* Icon */
+.icon {
+  color: var(--color-accent);
+  margin-bottom: 12px;
+}
+
+/* Title */
+.title {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+/* Description */
+.desc {
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

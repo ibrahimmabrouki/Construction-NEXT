@@ -1,0 +1,121 @@
+.section {
+  padding: 70px 0; /* 🔥 reduced spacing */
+}
+
+/* Container */
+.container {
+  width: min(1200px, 90%);
+  margin: 0 auto;
+}
+
+/* Layout */
+.grid {
+  display: flex;
+  align-items: center;
+  gap: 50px; /* 🔥 tighter than before */
+}
+
+/* LEFT */
+.left {
+  flex: 1;
+}
+
+/* Label */
+.label {
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+/* Title */
+.title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin: 10px 0 18px;
+}
+
+/* Text */
+.text {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 25px;
+  max-width: 480px;
+}
+
+/* Button */
+.button {
+  display: inline-block;
+  background: var(--color-accent);
+  color: white;
+  padding: 12px 22px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.button:hover {
+  opacity: 0.9;
+}
+
+/* RIGHT CARD */
+.card {
+  flex: 1;
+  background: #f7f7f5;
+  padding: 30px;
+  border-radius: 10px;
+  border: 1px solid #eee;
+}
+
+/* STEP */
+.step {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+/* Circle */
+.circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #ddd;
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Active Step */
+.active {
+  background: var(--color-accent);
+  color: white;
+}
+
+/* Step Text */
+.stepText {
+  font-size: 0.95rem;
+  color: #666;
+}
+
+/* Active Text */
+.activeText {
+  color: #111;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .grid {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .card {
+    width: 100%;
+  }
+}

@@ -1,0 +1,79 @@
+.page {
+  padding: 80px 0;
+}
+
+.section {
+  width: min(1200px, 90%);
+  margin: 0 auto;
+  padding-bottom: 7%;
+}
+
+/* FILTERS */
+.filters {
+  margin: 40px 0 50px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.filterBtn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  cursor: pointer;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  transition: all 0.25s ease;
+}
+
+.filterBtn:hover {
+  border-color: #c9a96e;
+  color: #c9a96e;
+}
+
+.active {
+  background: #c9a96e;
+  color: white;
+  border-color: #c9a96e;
+}
+
+.divider {
+  margin: 0 8px;
+  color: #ccc;
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.empty {
+  text-align: center;
+  margin-top: 40px;
+  color: #777;
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filterBtn {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+}
