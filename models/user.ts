@@ -1,6 +1,5 @@
 import { Schema, model, models } from "mongoose";
 
-//here we created the schema
 const UserSchema = new Schema(
   {
     username: {
@@ -18,7 +17,7 @@ const UserSchema = new Schema(
     roles: {
       type: [String],
       enum: ["admin", "projecteditor", "blogeditor", "newseditor", "manager"],
-      default: ["manager"],
+      required: true,
     },
   },
   { timestamps: true },

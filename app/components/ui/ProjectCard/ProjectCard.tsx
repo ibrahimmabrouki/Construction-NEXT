@@ -4,7 +4,7 @@ import styles from "./ProjectCard.module.css";
 
 interface ProjectCardProps {
   slug: string;
-  image: string[];
+  images: string[];
   title: string;
   location: string;
   price: string;
@@ -13,7 +13,7 @@ interface ProjectCardProps {
 
 export default function ProjectCard({
   slug,
-  image,
+  images,
   title,
   location,
   price,
@@ -23,9 +23,11 @@ export default function ProjectCard({
     <Link href={`/projects/${slug}`} className={styles.card}>
       <div className={styles.imageWrapper}>
         <Image
-          src={image?.[0] || "/images/project-1.jpg"}
+          src={images?.[0] || "/images/fallback.png"}
           alt={title}
           fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          loading="lazy"
           className={styles.image}
         />
 

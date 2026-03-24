@@ -17,8 +17,9 @@ async function getAllBlogs(): Promise<Blog[]> {
     `${process.env.NEXT_PUBLIC_API_URL}${process.env.BLOG_PUBLIC_URL}`,
   );
   const data = await response.json();
+  // console.log("These are the blogs " + data)
 
-  return data.blogs ?? [];
+  return data.data ?? [];
 }
 
 // Simulate DB fetch
@@ -70,9 +71,11 @@ export default async function BlogList() {
           >
             <div className={styles.imageWrapper}>
               <Image
-                src={post.image}
+                src={post.image || "/images/fallback.png"}
                 alt={post.title}
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                loading="lazy"
                 className={styles.image}
               />
             </div>

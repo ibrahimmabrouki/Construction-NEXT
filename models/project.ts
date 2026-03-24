@@ -15,7 +15,14 @@ const ProjectSchema = new Schema(
     },
     style: {
       type: String,
-      enum: ["Mediterranean", "Modern", "Tropical", "Contemporary"],
+      enum: [
+        "Mediterranean",
+        "Modern",
+        "Tropical",
+        "Contemporary",
+        "Minimalist",
+        "Industrial",
+      ],
       required: true,
       index: true,
     },
@@ -27,6 +34,9 @@ const ProjectSchema = new Schema(
   },
 );
 
+//  delete models.Project;
+
+// export default model("Project", ProjectSchema);
 
 const Project = models.Project || model("Project", ProjectSchema);
 

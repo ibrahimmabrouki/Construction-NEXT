@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import connect from "@/lib/db";
 import { findAllBlogs, findBlogBySlug } from "@/server-services/blogServices";
 import Blog from "@/models/blog";
+import { uploadToImgBB } from "@/utils/uploadToImgBB";
 
 //controller to get All Blogs
 export async function getAllBlogs(request: NextRequest) {
   try {
     await connect();
     const blogs = await findAllBlogs();
-    return NextResponse.json({ success: true, blogs });
+    return NextResponse.json({ success: true, data: blogs });
   } catch (error) {
     return NextResponse.json(
       { success: false, message: "Error fetching blogs" },
@@ -64,24 +65,50 @@ export interface BlogType {
 export async function createBlog(request: NextRequest) {
   try {
     await connect();
-    const body: BlogType = await request.json();
 
-    const { title, date, category, image, excerpt, content } = body;
+    const formData = await request.formData();
 
-    if (!title || !date || !category || !image || !excerpt || !content) {
+    const title = formData.get("title") as string;
+    const date = formData.get("date") as string;
+    const category = formData.get("category") as string;
+    const excerpt = formData.get("excerpt") as string;
+    const content = formData.get("content") as string;
+    const file = formData.get("image") as File;
+
+    if (!title || !date || !category || !excerpt || !content || !file) {
       return NextResponse.json(
         { message: "Missing required fields" },
         { status: 400 },
       );
     }
 
-    body.slug = title
+    const slug = title
       .toLowerCase()
       .trim()
       .replace(/\s+/g, "-")
       .replace(/[^\w-]+/g, "");
 
-    const blog = await Blog.create(body);
+    const existingBlog = await Blog.findOne({ slug });
+
+    if (existingBlog) {
+      return NextResponse.json(
+        { message: "A blog with this title already exists" },
+        { status: 409 },
+      );
+    }
+
+    const imageUrl = await uploadToImgBB(file);
+
+    const blog = await Blog.create({
+      title,
+      date,
+      category,
+      image: imageUrl,
+      excerpt,
+      content,
+      slug,
+    });
+
     return NextResponse.json(
       {
         message: "Blog created successfully",
@@ -114,35 +141,50 @@ export async function updateBlog(request: NextRequest, slug: string) {
       );
     }
 
-    const data = await request.json();
+    const formData = await request.formData();
 
-    if (!data || Object.keys(data).length === 0) {
-      return NextResponse.json(
-        { message: "No data provided for update" },
-        { status: 400 },
-      );
+    const title = formData.get("title") as string | null;
+    const date = formData.get("date") as string | null;
+    const category = formData.get("category") as string | null;
+    const excerpt = formData.get("excerpt") as string | null;
+    const content = formData.get("content") as string | null;
+    const file = formData.get("image") as File | null;
+
+    const existingBlog = await Blog.findOne({ slug });
+
+    if (!existingBlog) {
+      return NextResponse.json({ message: "Blog not found" }, { status: 404 });
     }
 
-    if (data.title) {
-      data.slug = data.title
+    let imageUrl = existingBlog.image;
+
+    if (file && file.size > 0) {
+      imageUrl = await uploadToImgBB(file);
+    }
+
+    const updateData: any = {};
+
+    if (title) {
+      updateData.title = title;
+
+      updateData.slug = title
         .toLowerCase()
         .trim()
         .replace(/\s+/g, "-")
         .replace(/[^\w-]+/g, "");
     }
 
-    const blog = await Blog.findOneAndUpdate(
-      { slug },
-      { ...data },
-      {
-        new: true,
-        runValidators: true,
-      },
-    );
+    if (date) updateData.date = date;
+    if (category) updateData.category = category;
+    if (excerpt) updateData.excerpt = excerpt;
+    if (content) updateData.content = content;
 
-    if (!blog) {
-      return NextResponse.json({ message: "Blog not found" }, { status: 404 });
-    }
+    updateData.image = imageUrl;
+
+    const blog = await Blog.findOneAndUpdate({ slug }, updateData, {
+      new: true,
+      runValidators: true,
+    });
 
     return NextResponse.json(
       {
@@ -171,7 +213,7 @@ export async function deleteBlog(request: NextRequest, slug: string) {
 
     if (!slug) {
       return NextResponse.json(
-        { message: "Slug is required" },
+        { success: false, message: "Slug is required" },
         { status: 400 },
       );
     }
@@ -179,12 +221,15 @@ export async function deleteBlog(request: NextRequest, slug: string) {
     const blog = await Blog.findOneAndDelete({ slug });
 
     if (!blog) {
-      return NextResponse.json({ message: "Blog not found" }, { status: 404 });
+      return NextResponse.json(
+        { success: false, message: "Blog not found" },
+        { status: 404 },
+      );
     }
 
     return NextResponse.json(
       {
-        message: "Blog deleted successfully",
+        success: true,
         data: blog,
       },
       { status: 200 },
@@ -194,6 +239,7 @@ export async function deleteBlog(request: NextRequest, slug: string) {
 
     return NextResponse.json(
       {
+        success: false,
         message: "Error deleting blog",
         error: error.message,
       },

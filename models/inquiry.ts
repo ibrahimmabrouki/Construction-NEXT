@@ -14,11 +14,15 @@ const InquirySchema = new Schema(
 
     status: {
       type: String,
-      enum: ["not_replied", "replied"],
-      default: "not_replied",
+      enum: ["New", "Reviewed"],
+      default: "New",
     },
   },
   { timestamps: true },
 );
+
+// delete models.Inquiry;
+
+// export default model("Inquiry", InquirySchema);
 
 export default models.Inquiry || model("Inquiry", InquirySchema);

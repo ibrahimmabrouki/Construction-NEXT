@@ -10,7 +10,7 @@ export async function getProjects() {
   return await getAllProject();
 }
 
-const styleFilters = ["All", "Mediterranean", "Modern", "Tropical", "Contemporary"];
+const styleFilters = ["All", "Mediterranean", "Modern", "Tropical", "Contemporary", "Minimalist", "Industrial"];
 const statusFilters = ["All", "Completed", "In Progress", "Planning"];
 
 export default function Projects() {
@@ -24,6 +24,7 @@ export default function Projects() {
       try {
         const data = await getProjects();
         setProjects(data);
+        console.log(data);
       } catch (error) {
         console.error(error);
       } finally {

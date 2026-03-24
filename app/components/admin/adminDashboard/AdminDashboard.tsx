@@ -1,24 +1,16 @@
 import styles from "./AdminDashboard.module.css";
 import Sidebar from "../Sidebar/Sidebar";
-import Topbar from "../Topbar/Topbar";
-import StatCard from "../StatCard/StatCard";
 import ProjectsManager from "../managers/ProjectsManager";
 import BlogsManager from "../managers/BlogsManager";
 import ServicesManager from "../managers/ServicesManager";
 import SubmissionsManager from "../managers/SubmissionsManager";
 import { cookies } from "next/headers";
-import { FolderOpen, FileText, Inbox, TrendingUp } from "lucide-react";
 
 const stats = [
-  { label: "Active Projects", value: "12", change: "+2.4%", icon: FolderOpen },
-  { label: "Blog Posts", value: "24", change: "+1.8%", icon: FileText },
-  { label: "Submissions", value: "8", change: "+0.6%", icon: Inbox },
-  {
-    label: "Total Revenue",
-    value: "€34.2M",
-    change: "+12.1%",
-    icon: TrendingUp,
-  },
+  { label: "Active Projects", value: "12" },
+  { label: "Blog Posts", value: "24" },
+  { label: "Submissions", value: "8" },
+  { label: "Total Revenue", value: "€34.2M" },
 ];
 
 export default async function AdminDashboard() {
@@ -37,28 +29,49 @@ export default async function AdminDashboard() {
 
   return (
     <div className={styles.layout}>
-      <Sidebar roles={roles} username={username} />
+      <Sidebar roles={roles} />
+
       <main className={styles.main}>
-        <Topbar username={username} />
 
-        {roles.includes("admin") && (
-          <div className={styles.stats}>
-            {stats.map((s) => (
-              <StatCard
-                key={s.label}
-                label={s.label}
-                value={s.value}
-                change={s.change}
-                icon={s.icon}
-              />
-            ))}
+        {/* Sticky centered top bar */}
+        <div className={styles.topBar}>
+          <p className={styles.welcome}>
+            Welcome back, <span>{username}</span>
+          </p>
+          {/* <h1 className={styles.heading}>Dashboard</h1> */}
+        </div>
+
+        {/* Scrollable content */}
+        <div className={styles.content}>
+
+          {roles.includes("admin") && (
+            <div className={styles.stats}>
+              {stats.map((s) => (
+                <div key={s.label} className={styles.statCard}>
+                  <p className={styles.statLabel}>{s.label}</p>
+                  <p className={styles.statValue}>{s.value}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div id="projects">
+            {is("projecteditor") && <ProjectsManager />}
           </div>
-        )}
 
-        {is("projecteditor") && <div id = "projects"><ProjectsManager /></div>}
-        {is("blogeditor") && <div id = "blogs" ><BlogsManager /></div>}
-        {roles.includes("admin") && <div id = "services" ><ServicesManager /></div>}
-        {is("manager") && <div id = "submissions" ><SubmissionsManager /></div>}
+          <div id="blogs">
+            {is("blogeditor") && <BlogsManager />}
+          </div>
+
+          <div id="services">
+            {roles.includes("admin") && <ServicesManager />}
+          </div>
+
+          <div id="submissions">
+            {is("manager") && <SubmissionsManager />}
+          </div>
+
+        </div>
       </main>
     </div>
   );

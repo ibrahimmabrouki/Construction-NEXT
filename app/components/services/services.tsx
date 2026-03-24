@@ -9,6 +9,7 @@ type Service = {
   desc: string;
 };
 
+
 //Fetch
 export async function getAllServices(): Promise<Service[]> {
   const response = await fetch(

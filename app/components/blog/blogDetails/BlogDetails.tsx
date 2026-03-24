@@ -5,7 +5,7 @@ type BlogDetails = {
   title: string;
   date: string;
   category: string;
-  content: string[];
+  content: string;
 };
 
 async function fetchBlogDetails(slug: string): Promise<BlogDetails | null> {
@@ -81,10 +81,8 @@ export default async function BlogDetail({ slug }: { slug: string }) {
               year: "numeric",
             })}
           </p>
-          <div className={styles.content}>
-            {post.content.map((p, i) => (
-              <p key={i}>{p}</p>
-            ))}
+          <div className={styles.content} style={{ whiteSpace: "pre-line" }}>
+            {post.content}
           </div>
 
           <div className={styles.footer}>

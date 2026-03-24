@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  // keep only valid options
+const nextConfig = {
+  images: {
+    domains: ["i.ibb.co"],
+  },
 };
 
 export default nextConfig;

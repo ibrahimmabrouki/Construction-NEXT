@@ -18,48 +18,12 @@ import {
 import { logoutAdmin } from "@/client-services/auth";
 
 const allLinks = [
-  {
-    label: "Dashboard",
-    path: "/admin",
-    hash: "",
-    icon: LayoutDashboard,
-    roles: ["admin"],
-  },
-  {
-    label: "Projects",
-    path: "/admin/projects",
-    hash: "#projects",
-    icon: FolderOpen,
-    roles: ["admin", "projecteditor"],
-  },
-  {
-    label: "Blog Posts",
-    path: "/admin/blogs",
-    hash: "#blogs",
-    icon: FileText,
-    roles: ["admin", "blogeditor"],
-  },
-  {
-    label: "News",
-    path: "/admin/news",
-    hash: "#news",
-    icon: Newspaper,
-    roles: ["admin", "newseditor"],
-  },
-  {
-    label: "Services",
-    path: "/admin/services",
-    hash: "#services",
-    icon: Wrench,
-    roles: ["admin"],
-  },
-  {
-    label: "Submissions",
-    path: "/admin/submissions",
-    hash: "#submissions",
-    icon: Inbox,
-    roles: ["admin", "manager"],
-  },
+  { label: "Dashboard",   path: "/admin",             icon: LayoutDashboard, roles: ["admin"] },
+  { label: "Projects",    path: "/admin/projects",    icon: FolderOpen,      roles: ["admin", "projecteditor"] },
+  { label: "Blog Posts",  path: "/admin/blogs",       icon: FileText,        roles: ["admin", "blogeditor"] },
+  { label: "News",        path: "/admin/news",        icon: Newspaper,       roles: ["admin", "newseditor"] },
+  { label: "Services",    path: "/admin/services",    icon: Wrench,          roles: ["admin"] },
+  { label: "Submissions", path: "/admin/submissions", icon: Inbox,           roles: ["admin", "manager"] },
 ];
 
 export default function Sidebar({
@@ -79,13 +43,15 @@ export default function Sidebar({
 
   const handleLogout = async () => {
     await logoutAdmin();
-    router.push("/admin-login");
+    router.push("/admin/login");
   };
 
   const close = () => setMobileOpen(false);
 
   const initials = username.slice(0, 1).toUpperCase();
-  const roleLabel = roles.includes("admin") ? "Admin" : (roles[0] ?? "User");
+  const roleLabel = roles.includes("admin")
+    ? "Admin"
+    : (roles[0] ?? "User");
 
   return (
     <>
@@ -104,6 +70,7 @@ export default function Sidebar({
       {mobileOpen && <div className={styles.overlay} onClick={close} />}
 
       <aside className={`${styles.sidebar} ${mobileOpen ? styles.open : ""}`}>
+
         {/* Logo */}
         <div className={styles.logoWrap}>
           <div className={styles.logoMark}>L</div>
@@ -114,15 +81,16 @@ export default function Sidebar({
         <nav className={styles.nav}>
           {visibleLinks.map((link) => {
             const Icon = link.icon;
-            const href = link.hash ? `${link.path}${link.hash}` : link.path;
             return (
               <Link
                 key={link.path}
                 href={link.path}
                 onClick={close}
-                className={`${styles.link} ${pathname === link.path ? styles.active : ""}`}
+                className={`${styles.link} ${
+                  pathname === link.path ? styles.active : ""
+                }`}
               >
-                <Icon size={17} />
+                <Icon size={16} />
                 {link.label}
               </Link>
             );
@@ -131,6 +99,7 @@ export default function Sidebar({
 
         {/* Bottom */}
         <div className={styles.bottom}>
+
           {/* User card */}
           <div className={styles.userCard}>
             <div className={styles.userAvatar}>{initials}</div>
@@ -149,6 +118,7 @@ export default function Sidebar({
             <LogOut size={16} />
             Log Out
           </button>
+
         </div>
       </aside>
     </>

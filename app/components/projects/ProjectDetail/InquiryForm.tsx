@@ -9,16 +9,16 @@ interface InquiryFormProps {
   slug: string;
 }
 
-type InquiryData = {
+interface InquiryDataSent {
   name: string;
   email: string;
   budget: string;
   message: string;
   projectTitle: string;
-};
+}
 
 export default function InquiryForm({ projectTitle, slug }: InquiryFormProps) {
-  const [form, setForm] = useState<InquiryData>({
+  const [form, setForm] = useState<InquiryDataSent>({
     name: "",
     email: "",
     budget: "",

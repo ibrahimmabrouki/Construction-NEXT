@@ -1,16 +1,24 @@
+/* ── Mobile top bar (hidden on desktop) ── */
 .mobileBar {
   display: none;
 }
 
+/* ── Sidebar ── */
 .sidebar {
-  width: 260px;
+  width: 240px;
   min-height: 100vh;
-  background: #fdf8f3;
-  border-right: 1px solid #ede8e0;
-  padding: 28px 16px 24px;
+  background: rgba(255, 255, 255, 0.55);
+  border-right: 1px solid rgba(194, 160, 99, 0.15);
+  padding: 32px 16px 24px;
+
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
+
+  /* ✅ KEY FIX */
+  justify-content: flex-start;
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 /* Logo area */
@@ -19,7 +27,7 @@
   align-items: center;
   gap: 10px;
   padding: 0 10px;
-  margin-bottom: 36px;
+  margin-bottom: 40px;
 }
 
 .logoMark {
@@ -37,11 +45,10 @@
 }
 
 .title {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 800;
   color: #1a1a1a;
   margin: 0;
-  letter-spacing: -0.3px;
 }
 
 /* Nav */
@@ -66,39 +73,98 @@
 }
 
 .link:hover {
-  background: #f0e9df;
+  background: rgba(194, 160, 99, 0.1);
   color: #333;
 }
 
 .active {
-  background: #f0e9df;
+  background: rgba(194, 160, 99, 0.15);
   color: #1a1a1a;
   font-weight: 600;
 }
 
 /* Bottom */
 .bottom {
-  padding-top: 16px;
-  border-top: 1px solid #ede8e0;
+  position: relative;
+  overflow: hidden;
+
+  margin-top: 16px;
+  padding: 16px;
+
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
+
+  border-radius: 14px;
+
+  /* Glass background */
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.55),
+    rgba(253, 246, 235, 0.35)
+  );
+
+  border: 1px solid rgba(255, 255, 255, 0.25);
+
+  /* Blur */
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  /* Depth */
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.06),
+    0 2px 6px rgba(194, 160, 99, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+
+  transition: all 0.25s ease;
 }
 
-/* User card at bottom */
+.bottom:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.08),
+    0 4px 10px rgba(194, 160, 99, 0.18),
+    inset 0 1px 1px rgba(255, 255, 255, 0.7);
+}
+
+.bottom::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 200%;
+  height: 100%;
+
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+
+  transform: skewX(-25deg);
+  transition: 0.6s;
+}
+
+.bottom:hover::before {
+  left: 100%;
+}
+
+/* User card */
 .userCard {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 12px 14px;
   border-radius: 10px;
-  background: #f0e9df;
-  margin-bottom: 10px;
+  background: rgba(194, 160, 99, 0.1);
+  margin-bottom: 8px;
 }
 
 .userAvatar {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background: var(--color-accent);
   color: white;
@@ -116,10 +182,13 @@
 }
 
 .userName {
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: #1a1a1a;
   display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .userRole {
@@ -149,11 +218,12 @@
   background: rgba(192, 57, 43, 0.06);
 }
 
+/* ── Overlay (mobile only) ── */
 .overlay {
   display: none;
 }
 
-/* Mobile */
+/* ── Mobile ── */
 @media (max-width: 768px) {
   .mobileBar {
     display: flex;
@@ -161,13 +231,14 @@
     justify-content: space-between;
     padding: 0 16px;
     height: 56px;
-    background: #fdf8f3;
-    border-bottom: 1px solid #ede8e0;
+    background: rgba(255, 255, 255, 0.8);
+    border-bottom: 1px solid rgba(194, 160, 99, 0.15);
     position: sticky;
     top: 0;
     z-index: 200;
     width: 100%;
     box-sizing: border-box;
+    backdrop-filter: blur(10px);
   }
 
   .mobileLogo {
@@ -189,18 +260,25 @@
     border-radius: 6px;
   }
 
+  .menuBtn:hover {
+    background: rgba(194, 160, 99, 0.1);
+  }
+
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     width: 260px;
     height: 100%;
+    min-height: 100%;
     z-index: 300;
     transform: translateX(-100%);
     transition: transform 0.28s ease;
     overflow-y: auto;
+    padding: 24px 16px;
     box-sizing: border-box;
-    min-height: unset;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
   }
 
   .sidebar.open {
@@ -212,7 +290,14 @@
     display: block;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.35);
     z-index: 250;
+    touch-action: none;
+  }
+
+  .link,
+  .logoutBtn {
+    font-size: 0.95rem;
+    padding: 12px 14px;
   }
 }
