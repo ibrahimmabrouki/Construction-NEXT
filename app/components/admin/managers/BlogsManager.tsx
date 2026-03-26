@@ -9,6 +9,9 @@ import {
   updateBlog,
   deletePost,
 } from "@/client-services/blogs";
+import { useAuthStore } from "../../../store/auth";
+import { wait } from "@/utils/delay";
+import Loader from "../../ui/Loader/Loader";
 
 interface Post {
   slug: string;
@@ -94,6 +97,13 @@ function todayFormatted() {
 }
 
 export default function BlogsManager() {
+  const hasAccess = useAuthStore((s) => s.hasAccess);
+  const createAccess = hasAccess("blogs", "create");
+  const updateAccess = hasAccess("blogs", "update");
+  const deleteAccess = hasAccess("blogs", "delete");
+
+  const [loadingMessage, setLoadingMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   //this useState is used to recieve and set all the posts after rendering the page through the useEffect
   const [posts, setPosts] = useState<Post[]>([]);
 
@@ -146,6 +156,10 @@ export default function BlogsManager() {
       const dateToUse = form.date || todayFormatted();
       //here we are updating the already existed posts
       if (editSlug) {
+        setLoadingMessage("Editing post...");
+        setLoading(true);
+        const start = Date.now();
+
         const data: UploadedPost = {
           image: imageFile,
           title: form.title,
@@ -160,6 +174,11 @@ export default function BlogsManager() {
         setPosts((prev) =>
           prev.map((p) => (p.slug === editSlug ? updated : p)),
         );
+        const elapsed = Date.now() - start;
+        if (elapsed < 1000) {
+          await wait(1000 - elapsed);
+        }
+        setLoading(false);
         setEditSlug(null);
       }
       //here we are addming new post
@@ -185,9 +204,18 @@ export default function BlogsManager() {
           content: form.content,
         };
 
+        setLoadingMessage("Creating post...");
+        setLoading(true);
+        const start = Date.now();
+
         const response = await createBlog(data);
 
         setPosts((prev) => [...prev, response]);
+        const elapsed = Date.now() - start;
+        if (elapsed < 1000) {
+          await wait(1000 - elapsed);
+        }
+        setLoading(false);
       }
     } catch (error) {
       console.error("Failed to post a blogs:", error);
@@ -202,6 +230,10 @@ export default function BlogsManager() {
   };
 
   const handleEdit = (p: Post) => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
     setForm({ ...p });
     setEditSlug(p.slug);
     setImagePreview(p.image);
@@ -212,13 +244,20 @@ export default function BlogsManager() {
     //also we need to diplay the alreadt posted image thats why we have the setImagePreview
   };
 
-
   //handler in order to delet the post.
   const handleDelete = async (slug: string) => {
     try {
       await deletePost(slug);
+      setLoadingMessage("Deleting post...");
+      setLoading(true);
+      const start = Date.now();
 
       setPosts((prev) => prev.filter((post) => post.slug !== slug));
+      const elapsed = Date.now() - start;
+      if (elapsed < 1000) {
+        await wait(1000 - elapsed);
+      }
+      setLoading(false);
     } catch (error) {
       console.error("Delete failed:", error);
     }
@@ -237,9 +276,17 @@ export default function BlogsManager() {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
+        setLoadingMessage("Loading posts...");
+        setLoading(true);
+        const start = Date.now();
         //getting the posts then setting them to the post state array
         const response = await getAllBlogs();
         setPosts(response);
+        const elapsed = Date.now() - start;
+        if (elapsed < 1000) {
+          await wait(1000 - elapsed);
+        }
+        setLoading(false);
       } catch (error) {
         console.error("Failed to fetch blogs:", error);
       }
@@ -248,232 +295,260 @@ export default function BlogsManager() {
   }, []);
 
   return (
-    <div className={styles.manager}>
-      <div className={styles.header}>
-        <div>
-          <h2>Blog Posts</h2>
-          {/* showing the total number of the blog posts based on the post state array length */}
-          <p className={styles.subtitle}>{posts.length} total</p>
-        </div>
+    <>
+      <Loader loading={loading} message={loadingMessage} variant="overlay" />
+      <div className={styles.manager}>
+        <div className={styles.header}>
+          <div>
+            <h2>Blog Posts</h2>
+            {/* showing the total number of the blog posts based on the post state array length */}
+            <p className={styles.subtitle}>{posts.length} total</p>
+          </div>
 
-        <button
-          className={styles.addBtn}
-          onClick={() => {
-            if (
-              (showForm && editSlug === null) ||
-              (showForm && editSlug !== null)
-            ) {
-              handleCancelForm();
-              // setShowForm(false);
-              // setEditSlug(null);
-              // setForm(empty);
-              // setImagePreview("");
-            } else {
-              setShowForm(true);
-              setEditSlug(null);
-              setForm(empty);
-              setImagePreview("");
-              setButtonText("Cancel");
-            }
-          }}
-        >
-          {/*for the below button the value of the text is initially + Add Post when the user clicks on it, the value change to cancel which is normal 
+          {createAccess && (
+            <button
+              className={styles.addBtn}
+              onClick={() => {
+                if (
+                  (showForm && editSlug === null) ||
+                  (showForm && editSlug !== null)
+                ) {
+                  handleCancelForm();
+                  // setShowForm(false);
+                  // setEditSlug(null);
+                  // setForm(empty);
+                  // setImagePreview("");
+                } else {
+                  setShowForm(true);
+                  setEditSlug(null);
+                  setForm(empty);
+                  setImagePreview("");
+                  setButtonText("Cancel");
+                }
+              }}
+            >
+              {/*for the below button the value of the text is initially + Add Post when the user clicks on it, the value change to cancel which is normal 
         the showForm becomes true which lead to displaying the form and since the slug value is null since the admin click dirctly on Add Post then the first condition is skipped (showForm = false initially)
         the form also set to empty and default values 
         and fro the imagePreview it is intially null and if the admin wants to add new post then it should anways set to null since 
         there is no preview image to be displayed*/}
 
-          {/* {showForm && editSlug === null ? "Cancel" : "+ Add Post"} same functionlity but is*/}
-          {buttonText}
+              {/* {showForm && editSlug === null ? "Cancel" : "+ Add Post"} same functionlity but is*/}
+              {buttonText}
 
-          {/* also for the above button when form is already open and there is or no slug it will call the handle cancel form to bring back everything to the intial state
+              {/* also for the above button when form is already open and there is or no slug it will call the handle cancel form to bring back everything to the intial state
           in the cancel handler we bring back the valur to it iniall state which is + Add Post, reseting the */}
-        </button>
-      </div>
+            </button>
+          )}
+        </div>
 
-      {showForm && (
-        <div className={styles.form}>
-          {/* this form will be used for both the adding new and editing the old posts so the texts will be displayed based on the editSlug value */}
-          <h3>{editSlug !== null ? "Edit Post" : "New Blog Post"}</h3>
+        {showForm && (
+          <div className={styles.form}>
+            {/* this form will be used for both the adding new and editing the old posts so the texts will be displayed based on the editSlug value */}
+            <h3>{editSlug !== null ? "Edit Post" : "New Blog Post"}</h3>
 
-          <div className={styles.fields}>
-            {/* Title — full width */}
-            <div className={styles.fieldGroup} style={{ gridColumn: "span 2" }}>
-              <label>Title *</label>
-              <input
-                placeholder="e.g. Smart Home Trends to Watch in 2026"
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-              />
-            </div>
-
-            {/* Category */}
-            <div className={styles.fieldGroup}>
-              <label>Category</label>
-              <select
-                value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value })}
-              >
-                {categoryOptions.map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Date */}
-            <div className={styles.fieldGroup}>
-              <label>Date (leave blank for today)</label>
-              <input
-                placeholder="e.g. Mar 10, 2026"
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-              />
-            </div>
-
-            {/* Image upload — full width */}
-            <div className={styles.fieldGroup} style={{ gridColumn: "span 2" }}>
-              <label>Cover Image *</label>
-
-              {/* Upload area */}
+            <div className={styles.fields}>
+              {/* Title — full width */}
               <div
-                //this is the hidden area that is used to upload the image and controlled by the useRef
-                className={styles.uploadArea}
-                onClick={() => fileInputRef.current?.click()}
-                //fileInputRef.current is the actual hidden button
+                className={styles.fieldGroup}
+                style={{ gridColumn: "span 2" }}
               >
-                {imagePreview ? (
-                  // if there is image preview which means the admin clicked on edit
-                  //then set the imagePreview in the handle edit
-                  //then display the first option
-                  <div className={styles.previewWrap}>
-                    <Image
-                      src={imagePreview}
-                      alt="Preview"
-                      fill
-                      className={styles.previewImage}
-                      unoptimized
-                    />
-                    <div className={styles.previewOverlay}>
-                      <span>Click to change image</span>
-                    </div>
-                  </div>
-                ) : (
-                  // if there is no image preview which means the admin clicked on + Add Post
-                  //then set the imagePreview to "" in bulck of button
-                  //then display the first second
-                  <div className={styles.uploadPlaceholder}>
-                    <div className={styles.uploadIcon}>↑</div>
-                    <p className={styles.uploadText}>Click to upload image</p>
-                    <p className={styles.uploadHint}>
-                      JPG, PNG, WEBP up to 10MB
-                    </p>
-                  </div>
-                )}
-                {/* all of these the two options are added into one big div that represents the container where the user will view old image incase of editing 
-                or upload the image incase posting a new post */}
+                <label>Title *</label>
+                <input
+                  placeholder="e.g. Smart Home Trends to Watch in 2026"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                />
               </div>
 
-              {/* Hidden file input */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                style={{ display: "none" }}
-              />
+              {/* Category */}
+              <div className={styles.fieldGroup}>
+                <label>Category</label>
+                <select
+                  value={form.category}
+                  onChange={(e) =>
+                    setForm({ ...form, category: e.target.value })
+                  }
+                >
+                  {categoryOptions.map((c) => (
+                    <option key={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
 
-              {/* Show stored path */}
-              {form.image && (
-                <p className={styles.imagePath}>
-                  Stored as: <code>{imagePreview}</code>
-                </p>
-              )}
+              {/* Date */}
+              <div className={styles.fieldGroup}>
+                <label>Date (leave blank for today)</label>
+                <input
+                  placeholder="e.g. Mar 10, 2026"
+                  value={form.date}
+                  onChange={(e) => setForm({ ...form, date: e.target.value })}
+                />
+              </div>
+
+              {/* Image upload — full width */}
+              <div
+                className={styles.fieldGroup}
+                style={{ gridColumn: "span 2" }}
+              >
+                <label>Cover Image *</label>
+
+                {/* Upload area */}
+                <div
+                  //this is the hidden area that is used to upload the image and controlled by the useRef
+                  className={styles.uploadArea}
+                  onClick={() => fileInputRef.current?.click()}
+                  //fileInputRef.current is the actual hidden button
+                >
+                  {imagePreview ? (
+                    // if there is image preview which means the admin clicked on edit
+                    //then set the imagePreview in the handle edit
+                    //then display the first option
+                    <div className={styles.previewWrap}>
+                      <Image
+                        src={imagePreview}
+                        alt="Preview"
+                        fill
+                        className={styles.previewImage}
+                        unoptimized
+                      />
+                      <div className={styles.previewOverlay}>
+                        <span>Click to change image</span>
+                      </div>
+                    </div>
+                  ) : (
+                    // if there is no image preview which means the admin clicked on + Add Post
+                    //then set the imagePreview to "" in bulck of button
+                    //then display the first second
+                    <div className={styles.uploadPlaceholder}>
+                      <div className={styles.uploadIcon}>↑</div>
+                      <p className={styles.uploadText}>Click to upload image</p>
+                      <p className={styles.uploadHint}>
+                        JPG, PNG, WEBP up to 10MB
+                      </p>
+                    </div>
+                  )}
+                  {/* all of these the two options are added into one big div that represents the container where the user will view old image incase of editing 
+                or upload the image incase posting a new post */}
+                </div>
+
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  style={{ display: "none" }}
+                />
+
+                {/* Show stored path */}
+                {form.image && (
+                  <p className={styles.imagePath}>
+                    Stored as: <code>{imagePreview}</code>
+                  </p>
+                )}
+              </div>
+
+              {/* Excerpt — full width */}
+              <div
+                className={styles.fieldGroup}
+                style={{ gridColumn: "span 2" }}
+              >
+                <label>Excerpt * (shown on blog grid card)</label>
+                <textarea
+                  placeholder="A short description shown on the blog listing page..."
+                  value={form.excerpt}
+                  onChange={(e) =>
+                    setForm({ ...form, excerpt: e.target.value })
+                  }
+                  rows={3}
+                />
+              </div>
+
+              {/* Content — full width */}
+              <div
+                className={styles.fieldGroup}
+                style={{ gridColumn: "span 2" }}
+              >
+                <label>Content * (full article body)</label>
+                <textarea
+                  placeholder="Write the full blog post content here..."
+                  value={form.content}
+                  onChange={(e) =>
+                    setForm({ ...form, content: e.target.value })
+                  }
+                  rows={8}
+                />
+              </div>
             </div>
 
-            {/* Excerpt — full width */}
-            <div className={styles.fieldGroup} style={{ gridColumn: "span 2" }}>
-              <label>Excerpt * (shown on blog grid card)</label>
-              <textarea
-                placeholder="A short description shown on the blog listing page..."
-                value={form.excerpt}
-                onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
-                rows={3}
-              />
-            </div>
+            {!editSlug && form.title && (
+              <p className={styles.slugPreview}>
+                URL slug: <code>/blog/{slugify(form.title)}</code>
+              </p>
+            )}
 
-            {/* Content — full width */}
-            <div className={styles.fieldGroup} style={{ gridColumn: "span 2" }}>
-              <label>Content * (full article body)</label>
-              <textarea
-                placeholder="Write the full blog post content here..."
-                value={form.content}
-                onChange={(e) => setForm({ ...form, content: e.target.value })}
-                rows={8}
-              />
+            <div className={styles.formActions}>
+              <button className={styles.saveBtn} onClick={handleSubmit}>
+                {editSlug !== null ? "Save Changes" : "Publish Post"}
+              </button>
+              <button className={styles.cancelBtn} onClick={handleCancelForm}>
+                Cancel
+              </button>
             </div>
           </div>
+        )}
 
-          {!editSlug && form.title && (
-            <p className={styles.slugPreview}>
-              URL slug: <code>/blog/{slugify(form.title)}</code>
-            </p>
-          )}
-
-          <div className={styles.formActions}>
-            <button className={styles.saveBtn} onClick={handleSubmit}>
-              {editSlug !== null ? "Save Changes" : "Publish Post"}
-            </button>
-            <button className={styles.cancelBtn} onClick={handleCancelForm}>
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Category</th>
-              <th>Date</th>
-              <th>Excerpt</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {posts.map((p) => (
-              <tr key={p.slug}>
-                <td>
-                  <span className={styles.primaryCell}>{p.title}</span>
-                  <span className={styles.slugCell}>{p.slug}</span>
-                </td>
-                <td>
-                  <span className={`${styles.badge}`}>{p.category}</span>
-                </td>
-                <td className={styles.dateCell}>{p.date}</td>
-                <td className={styles.excerptCell}>{p.excerpt}</td>
-                <td>
-                  <div className={styles.actions}>
-                    <button
-                      className={styles.editBtn}
-                      onClick={() => handleEdit(p)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className={styles.deleteBtn}
-                      onClick={() => handleDelete(p.slug)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
+        <div className={styles.tableWrapper}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Date</th>
+                <th>Excerpt</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {posts.map((p) => (
+                <tr key={p.slug}>
+                  <td>
+                    <span className={styles.primaryCell}>{p.title}</span>
+                    <span className={styles.slugCell}>{p.slug}</span>
+                  </td>
+                  <td>
+                    <span className={`${styles.badge}`}>{p.category}</span>
+                  </td>
+                  <td className={styles.dateCell}>{p.date}</td>
+                  <td className={styles.excerptCell}>{p.excerpt}</td>
+                  <td>
+                    <div className={styles.actions}>
+                      {updateAccess && (
+                        <button
+                          className={styles.editBtn}
+                          onClick={() => handleEdit(p)}
+                        >
+                          Edit
+                        </button>
+                      )}
+
+                      {deleteAccess && (
+                        <button
+                          className={styles.deleteBtn}
+                          onClick={() => handleDelete(p.slug)}
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

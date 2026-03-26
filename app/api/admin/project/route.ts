@@ -2,6 +2,9 @@ import { AddProject, getAllProjects } from "@/controllers/projectController";
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateUser, authorizeRoles } from "@/middlewares/authMiddleware";
 
+//resource: ["projects", "blogs", "services", "users", "inquiries"];
+//Action = "create" | "read" | "update" | "delete";
+
 //route to get all projects
 // export const GET = getAllProjects;
 export const GET = async (request: NextRequest) => {
@@ -11,7 +14,10 @@ export const GET = async (request: NextRequest) => {
   }
 
   // 2. Authorize
-  const roleCheck = authorizeRoles(user, ["admin", "projecteditor"]);
+  const roleCheck = authorizeRoles(user, {
+    resource: "projects",
+    action: "read",
+  });
 
   if (roleCheck) {
     return roleCheck; // returns 401 or 403
@@ -29,12 +35,15 @@ export const POST = async (request: NextRequest) => {
   }
 
   // 2. Authorize
-  const roleCheck = authorizeRoles(user, ["admin", "projecteditor"]);
+  const roleCheck = authorizeRoles(user, {
+    resource: "projects",
+    action: "create",
+  });
 
   if (roleCheck) {
     return roleCheck; // returns 401 or 403
   }
 
   // 3. Call your controller
-  return AddProject(request);
+  return AddProject(request, user.username);
 };

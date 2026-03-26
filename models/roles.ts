@@ -33,5 +33,9 @@ const RoleSchema = new Schema(
   },
 );
 
-const Role = models.Role || model("Role", RoleSchema);
-export default Role;
+delete models.Role;
+export const User = model("Role", RoleSchema);
+
+// const Role = models.Role || model("Role", RoleSchema);
+// export default Role;
+

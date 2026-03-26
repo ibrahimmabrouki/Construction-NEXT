@@ -2,6 +2,10 @@ import { deleteProject, updateProject } from "@/controllers/projectController";
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateUser, authorizeRoles } from "@/middlewares/authMiddleware";
 
+//resource: ["projects", "blogs", "services", "users", "inquiries"];
+//Action = "create" | "read" | "update" | "delete";
+
+
 // route to update the project
 export const PATCH = async (
   request: NextRequest,
@@ -13,7 +17,7 @@ export const PATCH = async (
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const roleCheck = authorizeRoles(user, ["admin", "projecteditor"]);
+  const roleCheck = authorizeRoles(user, {resource: "projects", action: "update"});
 
   if (roleCheck) {
     return roleCheck;
@@ -21,7 +25,7 @@ export const PATCH = async (
 
   const { slug } = await params;
 
-  return updateProject(request, slug);
+  return updateProject(request, slug, user.username);
 };
 
 // route to delete the project
@@ -35,7 +39,7 @@ export const DELETE = async (
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const roleCheck = authorizeRoles(user, ["admin", "projecteditor"]);
+  const roleCheck = authorizeRoles(user, {resource: "projects", action: "delete"});
 
   if (roleCheck) {
     return roleCheck;
@@ -43,5 +47,5 @@ export const DELETE = async (
 
   const { slug } = await params;
 
-  return deleteProject(request, slug);
+  return deleteProject(request, slug, user.username);
 };

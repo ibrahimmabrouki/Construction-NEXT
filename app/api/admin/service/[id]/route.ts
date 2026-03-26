@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { authenticateUser, authorizeRoles } from "@/middlewares/authMiddleware";
 import { updateService, deleteService } from "@/controllers/serviceController";
 
+//resource: ["projects", "blogs", "services", "users", "inquiries"];
+//Action = "create" | "read" | "update" | "delete";
+
+
 // route to update the service
 export const PATCH = async (
   request: NextRequest,
@@ -13,7 +17,10 @@ export const PATCH = async (
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const roleCheck = authorizeRoles(user, ["admin", "serviceeditor"]);
+  const roleCheck = authorizeRoles(user, {
+    resource: "services",
+    action: "update",
+  });
 
   if (roleCheck) {
     return roleCheck;
@@ -23,7 +30,7 @@ export const PATCH = async (
 
   console.log("ID:", id);
 
-  return updateService(request, id);
+  return updateService(request, id, user.username);
 };
 
 //route to delete the serive
@@ -37,7 +44,10 @@ export const DELETE = async (
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const roleCheck = authorizeRoles(user, ["admin", "serviceeditor"]);
+  const roleCheck = authorizeRoles(user, {
+    resource: "services",
+    action: "delete",
+  });
 
   if (roleCheck) {
     return roleCheck;
@@ -45,5 +55,5 @@ export const DELETE = async (
 
   const { id } = await params;
 
-  return deleteService(request, id);
+  return deleteService(request, id, user.username);
 };

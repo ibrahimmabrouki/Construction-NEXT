@@ -16,14 +16,14 @@ export default function HomePage() {
   return (
     <div>
       <Hero />
-      <Suspense fallback={loadingProjectsTSX}>
+      <Suspense>
         <FeaturedProjects />
       </Suspense>
-      <Suspense fallback={loadingServicesTSX}>
+      <Suspense>
         <HomeServices />
       </Suspense>
       <AISection />
-      <Suspense fallback={loadingTestimonialsTSX}>
+      <Suspense>
         <Testimonials />
       </Suspense>
     </div>

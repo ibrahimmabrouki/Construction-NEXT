@@ -16,39 +16,6 @@ async function fetchBlogDetails(slug: string): Promise<BlogDetails | null> {
   return data.blog;
 }
 
-// // Simulate DB fetch
-// async function getPost(slug: string) {
-//   const data: Record<
-//     string,
-//     { title: string; date: string; category: string; content: string[] }
-//   > = {
-//     "smart-home-trends-2026": {
-//       title: "Smart Home Trends to Watch in 2026",
-//       date: "March 10, 2026",
-//       category: "Technology",
-//       content: [
-//         "The smart home industry continues to evolve at a breathtaking pace...",
-//         "AI-powered climate control systems now learn from occupant behavior...",
-//         "Integrated wellness monitoring is becoming standard...",
-//         "Voice and gesture control have matured beyond simple commands...",
-//       ],
-//     },
-//     "sustainable-luxury-building": {
-//       title: "Sustainable Luxury: Building Without Compromise",
-//       date: "February 28, 2026",
-//       category: "Sustainability",
-//       content: [
-//         "The notion that sustainability requires sacrifice is outdated...",
-//         "Cross-laminated timber and recycled materials now dominate...",
-//         "Solar integration has evolved beyond rooftop panels...",
-//         "Water reclamation and geothermal systems are now standard...",
-//       ],
-//     },
-//   };
-
-//   return data[slug];
-// }
-
 export default async function BlogDetail({ slug }: { slug: string }) {
   const post = await fetchBlogDetails(slug);
 

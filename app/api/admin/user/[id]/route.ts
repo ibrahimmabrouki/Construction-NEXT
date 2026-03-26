@@ -1,26 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateUser, authorizeRoles } from "@/middlewares/authMiddleware";
-import {
-  deleteUserById, updateUserById,
-} from "@/controllers/userController";
+import { deleteUserById, updateUserById } from "@/controllers/userController";
 
+//resource: ["projects", "blogs", "services", "users", "inquiries"];
+//Action = "create" | "read" | "update" | "delete";
 
 //route to update user by ID
 export const PATCH = async (
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) => {
-  //   const user = await authenticateUser(request);
+  const user = await authenticateUser(request);
 
-  //   if (!user) {
-  //     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  //   }
+  if (!user) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
 
-  //   const roleCheck = authorizeRoles(user, ["admin", "inquiryeditor", "manager"]);
+  const roleCheck = authorizeRoles(user, {
+    resource: "users",
+    action: "update",
+  });
 
-  //   if (roleCheck) {
-  //     return roleCheck;
-  //   }
+  if (roleCheck) {
+    return roleCheck;
+  }
 
   const { id } = await params;
 
@@ -32,17 +35,20 @@ export const DELETE = async (
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) => {
-  //   const user = await authenticateUser(request);
+  const user = await authenticateUser(request);
 
-  //   if (!user) {
-  //     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  //   }
+  if (!user) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
 
-  //   const roleCheck = authorizeRoles(user, ["admin", "inquiryeditor", "manager"]);
+  const roleCheck = authorizeRoles(user, {
+    resource: "users",
+    action: "delete",
+  });
 
-  //   if (roleCheck) {
-  //     return roleCheck;
-  //   }
+  if (roleCheck) {
+    return roleCheck;
+  }
 
   const { id } = await params;
 

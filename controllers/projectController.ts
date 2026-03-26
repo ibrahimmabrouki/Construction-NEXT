@@ -6,6 +6,7 @@ import {
   insertProject,
 } from "@/server-services/projectServices";
 import Project from "@/models/project";
+import Activity from "@/models/activity";
 import { uploadToImgBB } from "@/utils/uploadToImgBB";
 
 //conroller to get all the projects
@@ -87,7 +88,7 @@ export interface ProjectType {
 }
 
 //contorller to add new project to the database
-export async function AddProject(req: NextRequest) {
+export async function AddProject(req: NextRequest, username: string) {
   try {
     await connect();
 
@@ -160,6 +161,12 @@ export async function AddProject(req: NextRequest) {
       slug,
     });
 
+    await Activity.create({
+      user: username,
+      action: "created",
+      resource: "project",
+      title: project.title,
+    });
     return NextResponse.json(
       {
         message: "Project created successfully",
@@ -181,7 +188,11 @@ export async function AddProject(req: NextRequest) {
 }
 
 //controller to update the project by slug
-export async function updateProject(request: NextRequest, slug: string) {
+export async function updateProject(
+  request: NextRequest,
+  slug: string,
+  username: string,
+) {
   try {
     await connect();
 
@@ -258,6 +269,13 @@ export async function updateProject(request: NextRequest, slug: string) {
       );
     }
 
+    await Activity.create({
+      user: username,
+      action: "updated",
+      resource: "project",
+      title: project.title,
+    });
+
     return NextResponse.json(
       {
         message: "Project updated successfully",
@@ -279,7 +297,11 @@ export async function updateProject(request: NextRequest, slug: string) {
 }
 
 //delete the project by slug
-export async function deleteProject(request: NextRequest, slug: string) {
+export async function deleteProject(
+  request: NextRequest,
+  slug: string,
+  username: string,
+) {
   try {
     await connect();
 
@@ -299,6 +321,12 @@ export async function deleteProject(request: NextRequest, slug: string) {
       );
     }
 
+    await Activity.create({
+      user: username,
+      action: "deleted",
+      resource: "project",
+      title: project.title,
+    });
     return NextResponse.json(
       {
         success: true,

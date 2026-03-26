@@ -1,4 +1,3 @@
-/* ── Mobile top bar (hidden on desktop) ── */
 .mobileBar {
   display: none;
 }
@@ -6,19 +5,23 @@
 /* ── Sidebar ── */
 .sidebar {
   width: 240px;
-  min-height: 100vh;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  left: 0;
+
   background: rgba(255, 255, 255, 0.55);
   border-right: 1px solid rgba(194, 160, 99, 0.15);
   padding: 32px 16px 24px;
 
   display: flex;
   flex-direction: column;
-
-  /* ✅ KEY FIX */
   justify-content: flex-start;
 
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+
+  transition: transform 0.3s ease;
 }
 
 /* Logo area */
@@ -88,7 +91,8 @@
   position: relative;
   overflow: hidden;
 
-  margin-top: 16px;
+  margin-top: auto; /* ✅ FIXED */
+
   padding: 16px;
 
   display: flex;
@@ -97,7 +101,6 @@
 
   border-radius: 14px;
 
-  /* Glass background */
   background: linear-gradient(
     145deg,
     rgba(255, 255, 255, 0.55),
@@ -106,11 +109,9 @@
 
   border: 1px solid rgba(255, 255, 255, 0.25);
 
-  /* Blur */
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 
-  /* Depth */
   box-shadow:
     0 6px 18px rgba(0, 0, 0, 0.06),
     0 2px 6px rgba(194, 160, 99, 0.12),
@@ -218,7 +219,7 @@
   background: rgba(192, 57, 43, 0.06);
 }
 
-/* ── Overlay (mobile only) ── */
+/* ── Overlay ── */
 .overlay {
   display: none;
 }
@@ -231,13 +232,16 @@
     justify-content: space-between;
     padding: 0 16px;
     height: 56px;
-    background: rgba(255, 255, 255, 0.8);
-    border-bottom: 1px solid rgba(194, 160, 99, 0.15);
-    position: sticky;
+
+    position: fixed;
     top: 0;
-    z-index: 200;
+    left: 0;
     width: 100%;
-    box-sizing: border-box;
+
+    background: rgba(255, 255, 255, 0.9);
+    border-bottom: 1px solid rgba(194, 160, 99, 0.15);
+
+    z-index: 200;
     backdrop-filter: blur(10px);
   }
 
@@ -251,13 +255,11 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: #1a1a1a;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 6px;
   }
 
   .menuBtn:hover {
@@ -268,20 +270,23 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 260px;
+
+    width: 0;
+    padding: 0;
+
     height: 100%;
-    min-height: 100%;
-    z-index: 300;
+    overflow: hidden;
+
     transform: translateX(-100%);
-    transition: transform 0.28s ease;
-    overflow-y: auto;
-    padding: 24px 16px;
-    box-sizing: border-box;
+    z-index: 300;
+
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
   }
 
   .sidebar.open {
+    width: 260px;
+    padding: 24px 16px;
     transform: translateX(0);
     box-shadow: 4px 0 32px rgba(0, 0, 0, 0.1);
   }
@@ -292,12 +297,16 @@
     inset: 0;
     background: rgba(0, 0, 0, 0.35);
     z-index: 250;
-    touch-action: none;
+  }
+}
+
+/* Desktop safety */
+@media (min-width: 769px) {
+  .sidebar {
+    transform: none !important;
   }
 
-  .link,
-  .logoutBtn {
-    font-size: 0.95rem;
-    padding: 12px 14px;
+  .overlay {
+    display: none !important;
   }
 }

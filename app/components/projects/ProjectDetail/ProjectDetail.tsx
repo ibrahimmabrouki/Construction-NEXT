@@ -126,61 +126,60 @@ export default async function ProjectDetail({ slug }: { slug: string }) {
   const statusKey = statusClass[project.status] ?? "statusPlanning";
 
   return (
-  <main className="page-project-details">
-    <section
-      className={styles.hero}
-      style={{
-        backgroundImage: "url('/images/dubai-bg.png')",
-      }}
-    >
-      <div className={styles.overlay} />
+    <main className="page-project-details">
+      <section
+        className={styles.hero}
+        style={{
+          backgroundImage: "url('/images/dubai-bg.png')",
+        }}
+      >
+        <div className={styles.overlay} />
 
-      <div className={styles.container}>
-        <div className={styles.grid}>
-          
-          {/* LEFT */}
-          <div className={styles.left}>
-            <span className={`${styles.statusBadge} ${styles[statusKey]}`}>
-              {project.status}
-            </span>
+        <div className={styles.container}>
+          <div className={styles.grid}>
+            {/* LEFT */}
+            <div className={styles.left}>
+              <span className={`${styles.statusBadge} ${styles[statusKey]}`}>
+                {project.status}
+              </span>
 
-            <h1 className={styles.title}>{project.title}</h1>
+              <h1 className={styles.title}>{project.title}</h1>
 
-            <p className={styles.meta}>
-              {project.location}
-              <span className={styles.metaDot}>·</span>
-              {project.price}
-            </p>
+              <p className={styles.meta}>
+                {project.location}
+                <span className={styles.metaDot}>·</span>
+                {project.price}
+              </p>
 
-            <p className={styles.description}>{project.description}</p>
+              <p className={styles.description}>{project.description}</p>
 
-            <div className={styles.details}>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Location</span>
-                <span className={styles.detailValue}>{project.location}</span>
+              <div className={styles.details}>
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Location</span>
+                  <span className={styles.detailValue}>{project.location}</span>
+                </div>
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Investment</span>
+                  <span className={styles.detailValue}>{project.price}</span>
+                </div>
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Status</span>
+                  <span className={styles.detailValue}>{project.status}</span>
+                </div>
               </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Investment</span>
-                <span className={styles.detailValue}>{project.price}</span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Status</span>
-                <span className={styles.detailValue}>{project.status}</span>
-              </div>
+
+              <Link href="/projects" className={styles.allProjectsLink}>
+                ← All Projects
+              </Link>
             </div>
 
-            <Link href="/projects" className={styles.allProjectsLink}>
-              ← All Projects
-            </Link>
-          </div>
-
-          {/* RIGHT */}
-          <div className={styles.right}>
-            <InquiryForm projectTitle={project.title} slug={project.slug} />
+            {/* RIGHT */}
+            <div className={styles.right}>
+              <InquiryForm projectTitle={project.title} slug={project.slug} />
+            </div>
           </div>
         </div>
-      </div>
-    </section>
-  </main>
-);
+      </section>
+    </main>
+  );
 }

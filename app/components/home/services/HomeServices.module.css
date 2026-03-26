@@ -1,5 +1,5 @@
 .section {
-  padding: 70px 0; /* 🔥 reduced spacing (fix your issue) */
+  padding: 70px 0; 
   background: #f7f7f5;
 }
 
@@ -12,7 +12,7 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 22px; /* 🔥 tighter spacing */
+  gap: 22px;
 }
 
 /* Card */
@@ -24,7 +24,6 @@
   transition: all 0.3s ease;
 }
 
-/* Hover effect (premium feel) */
 .card:hover {
   transform: translateY(-6px);
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.07);

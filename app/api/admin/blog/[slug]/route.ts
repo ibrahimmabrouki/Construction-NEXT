@@ -2,6 +2,9 @@ import { deleteBlog, updateBlog } from "@/controllers/blogController";
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateUser, authorizeRoles } from "@/middlewares/authMiddleware";
 
+//resource: ["projects", "blogs", "services", "users", "inquiries"];
+//Action = "create" | "read" | "update" | "delete";
+
 // route to update the blog
 export const PATCH = async (
   request: NextRequest,
@@ -13,7 +16,10 @@ export const PATCH = async (
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const roleCheck = authorizeRoles(user, ["admin", "blogeditor"]);
+  const roleCheck = authorizeRoles(user, {
+    resource: "blogs",
+    action: "update",
+  });
 
   if (roleCheck) {
     return roleCheck;
@@ -21,7 +27,7 @@ export const PATCH = async (
 
   const { slug } = await params;
 
-  return updateBlog(request, slug);
+  return updateBlog(request, slug, user.username);
 };
 
 // route to delete the blog
@@ -35,7 +41,10 @@ export const DELETE = async (
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const roleCheck = authorizeRoles(user, ["admin", "blogeditor"]);
+  const roleCheck = authorizeRoles(user, {
+    resource: "blogs",
+    action: "delete",
+  });
 
   if (roleCheck) {
     return roleCheck;

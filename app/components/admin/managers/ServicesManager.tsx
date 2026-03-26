@@ -10,6 +10,9 @@ import {
   editService,
   getAllServices,
 } from "@/client-services/services";
+import { useAuthStore } from "../../../store/auth";
+import { wait } from "@/utils/delay";
+import Loader from "../../ui/Loader/Loader";
 
 interface Service {
   _id: string;
@@ -68,6 +71,14 @@ const empty: Omit<Service, "_id"> = {
 };
 
 export default function ServicesManager() {
+  const hasAccess = useAuthStore((s) => s.hasAccess);
+  const createAccess = hasAccess("blogs", "create");
+  const updateAccess = hasAccess("blogs", "update");
+  const deleteAccess = hasAccess("blogs", "delete");
+
+  const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
+
   const [services, setServices] = useState<Service[]>([]);
   const [form, setForm] = useState<Omit<Service, "_id">>(empty);
 
@@ -78,15 +89,27 @@ export default function ServicesManager() {
   //initially the form to edit or to create service is hidden
   const [showForm, setShowForm] = useState(false);
 
+  const [buttonText, setButtonText] = useState("+ Add Service");
+
   const handleSubmit = async () => {
     if (!form.title || !form.desc) return;
 
     try {
       if (editId) {
+        setLoadingMessage("Updating services...");
+        setLoading(true);
+        const start = Date.now();
         const response = await editService(form, editId);
 
         setServices(services.map((s) => (s._id === editId ? response : s)));
+        const elapsed = Date.now() - start;
+        if (elapsed < 1000) {
+          await wait(1000 - elapsed);
+        }
       } else {
+        setLoadingMessage("Creating service...");
+        setLoading(true);
+        const start = Date.now();
         const response = await createService(form);
 
         setServices([...services, response]);
@@ -95,8 +118,11 @@ export default function ServicesManager() {
       setForm(empty);
       setEditId(null);
       setShowForm(false);
+      setButtonText("+ Add Service");
     } catch (error) {
       console.error("Error submitting service:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -104,6 +130,10 @@ export default function ServicesManager() {
   //it also take the servie that we want and set its id, to know which id should be edited in the frontend.
   //also it calls setForm in oder to use the current data to be edited (for the tardgeted service)
   const handleEdit = (s: Service) => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
     setForm({
       iconName: s.iconName,
       title: s.title,
@@ -111,29 +141,32 @@ export default function ServicesManager() {
     });
     setEditId(s._id);
     setShowForm(true);
+    setButtonText("Cancel");
   };
 
   const handleDelete = async (_id: string) => {
     try {
-
       //just for protection but it is not going to happen
-      if(!_id){
+      if (!_id) {
         alert("ID is not defined");
       }
+      setLoadingMessage("Deleting service...");
+      setLoading(true);
+      const start = Date.now();
 
       const response = await deleteService(_id);
 
-      if(response._id === _id){
-        setServices(services.filter((s)=> s._id !== _id))
+      if (response._id === _id) {
+        setServices(services.filter((s) => s._id !== _id));
+        const elapsed = Date.now() - start;
+        if (elapsed < 1000) {
+          await wait(1000 - elapsed);
+        }
       }
-
-
-
     } catch (error) {
       console.error("Error deleting service:", error);
-    }
-    if (confirm("Delete this service?")) {
-      setServices(services.filter((s) => s._id !== _id));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -141,10 +174,19 @@ export default function ServicesManager() {
   useEffect(() => {
     const fetchServices = async () => {
       try {
+        setLoadingMessage("Loading serices...");
+        setLoading(true);
+        const start = Date.now();
         const response = await getAllServices();
         setServices(response);
+        const elapsed = Date.now() - start;
+        if (elapsed < 1000) {
+          await wait(1000 - elapsed);
+        }
       } catch (error) {
         console.error("Failed to fetch services:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -152,141 +194,161 @@ export default function ServicesManager() {
   }, []);
 
   return (
-    <div className={styles.manager}>
-      <div className={styles.header}>
-        <div>
-          <h2>Services</h2>
-          <p className={styles.subtitle}>{services.length} total</p>
-        </div>
-
-        <button
-          className={styles.addBtn}
-          onClick={() => {
-            setShowForm(!showForm); // initlly showForm is false => !false = true.
-            setEditId(null);
-            setForm(empty); //setting the form to be empty since we are adding new service.
-          }}
-        >
-          {showForm && editId === null ? "Cancel" : "+ Add Service"}
-        </button>
-      </div>
-
-      {showForm && (
-        <div className={styles.form}>
-          <h3>{editId !== null ? "Edit Service" : "New Service"}</h3>
-
-          <div className={styles.fields}>
-            <div className={styles.fieldGroup}>
-              <label>Title *</label>
-              <input
-                placeholder="e.g. Villa Construction"
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-              />
-            </div>
-
-            <div className={styles.fieldGroup}>
-              <label>Icon</label>
-              <select
-                value={form.iconName}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    iconName: e.target.value as IconName,
-                  })
-                }
-              >
-                {AVAILABLE_ICONS.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.fieldGroup} style={{ gridColumn: "span 2" }}>
-              <label>Description *</label>
-              <textarea
-                placeholder="Describe this service..."
-                value={form.desc}
-                onChange={(e) => setForm({ ...form, desc: e.target.value })}
-                rows={3}
-              />
-            </div>
+    <>
+      <Loader loading={loading} message={loadingMessage} variant="overlay" />
+      <div className={styles.manager}>
+        <div className={styles.header}>
+          <div>
+            <h2>Services</h2>
+            <p className={styles.subtitle}>{services.length} total</p>
           </div>
 
-          {/* setting up the icon preview at the bottom left
-           it is taken from the form 
-           note that the default value is Building2*/}
-          {form.iconName &&
-            (() => {
-              const Icon = ICON_MAP[form.iconName] || Building2;
-              return (
-                <div className={styles.iconPreview}>
-                  <Icon size={20} />
-                  <span>Icon preview: {form.iconName}</span>
-                </div>
-              );
-            })()}
-
-          {/* after clicking the + Add Service
-          editId = null
-          null !== null is false => Create Service*/}
-          <div className={styles.formActions}>
-            <button className={styles.saveBtn} onClick={handleSubmit}>
-              {editId !== null ? "Save Changes" : "Create Service"}
-            </button>
-
+          {createAccess && (
             <button
-              className={styles.cancelBtn}
+              className={styles.addBtn}
               onClick={() => {
-                setShowForm(false);
-
-                // setting the edit id to null even after trying to edit not only the after clicking create
-                //since we need reset to initial state.
-                setEditId(null);
+                if (showForm) {
+                  setShowForm(false);
+                  setEditId(null);
+                  setForm(empty);
+                  setButtonText("+ Add Service");
+                } else {
+                  setShowForm(true); // initlly showForm is false => !false = true.
+                  setEditId(null);
+                  setForm(empty); //setting the form to be empty since we are adding new service.
+                  setButtonText("Cancel");
+                }
               }}
             >
-              Cancel
+              {buttonText}
             </button>
-          </div>
+          )}
         </div>
-      )}
 
-      <div className={styles.serviceGrid}>
-        {services.map((s) => {
-          const Icon = ICON_MAP[s.iconName] || Building2;
+        {showForm && (
+          <div className={styles.form}>
+            <h3>{editId !== null ? "Edit Service" : "New Service"}</h3>
 
-          return (
-            <div key={s._id} className={styles.serviceCard}>
-              <div className={styles.serviceCardTop}>
-                <div className={styles.serviceIconWrap}>
-                  <Icon size={20} />
-                </div>
-
-                <div className={styles.actions}>
-                  <button
-                    className={styles.editBtn}
-                    onClick={() => handleEdit(s)}
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    className={styles.deleteBtn}
-                    onClick={() => handleDelete(s._id)}
-                  >
-                    Delete
-                  </button>
-                </div>
+            <div className={styles.fields}>
+              <div className={styles.fieldGroup}>
+                <label>Title *</label>
+                <input
+                  placeholder="e.g. Villa Construction"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                />
               </div>
 
-              <h4 className={styles.serviceCardTitle}>{s.title}</h4>
-              <p className={styles.serviceCardDesc}>{s.desc}</p>
+              <div className={styles.fieldGroup}>
+                <label>Icon</label>
+                <select
+                  value={form.iconName}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      iconName: e.target.value as IconName,
+                    })
+                  }
+                >
+                  {AVAILABLE_ICONS.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div
+                className={styles.fieldGroup}
+                style={{ gridColumn: "span 2" }}
+              >
+                <label>Description *</label>
+                <textarea
+                  placeholder="Describe this service..."
+                  value={form.desc}
+                  onChange={(e) => setForm({ ...form, desc: e.target.value })}
+                  rows={3}
+                />
+              </div>
             </div>
-          );
-        })}
+
+            {/* setting up the icon preview at the bottom left
+           it is taken from the form 
+           note that the default value is Building2*/}
+            {form.iconName &&
+              (() => {
+                const Icon = ICON_MAP[form.iconName] || Building2;
+                return (
+                  <div className={styles.iconPreview}>
+                    <Icon size={20} />
+                    <span>Icon preview: {form.iconName}</span>
+                  </div>
+                );
+              })()}
+
+            {/* after clicking the + Add Service
+          editId = null
+          null !== null is false => Create Service*/}
+            <div className={styles.formActions}>
+              <button className={styles.saveBtn} onClick={handleSubmit}>
+                {editId !== null ? "Save Changes" : "Create Service"}
+              </button>
+
+              <button
+                className={styles.cancelBtn}
+                onClick={() => {
+                  setShowForm(false);
+
+                  // setting the edit id to null even after trying to edit not only the after clicking create
+                  //since we need reset to initial state.
+                  setEditId(null);
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className={styles.serviceGrid}>
+          {services.map((s) => {
+            const Icon = ICON_MAP[s.iconName] || Building2;
+
+            return (
+              <div key={s._id} className={styles.serviceCard}>
+                <div className={styles.serviceCardTop}>
+                  <div className={styles.serviceIconWrap}>
+                    <Icon size={20} />
+                  </div>
+
+                  <div className={styles.actions}>
+                    {updateAccess && (
+                      <button
+                        className={styles.editBtn}
+                        onClick={() => handleEdit(s)}
+                      >
+                        Edit
+                      </button>
+                    )}
+
+                    {deleteAccess && (
+                      <button
+                        className={styles.deleteBtn}
+                        onClick={() => handleDelete(s._id)}
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <h4 className={styles.serviceCardTitle}>{s.title}</h4>
+                <p className={styles.serviceCardDesc}>{s.desc}</p>
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -1,4 +1,4 @@
-import ProjectDetail from "../../components/projects/ProjectDetail/ProjectDetail";
+import ProjectDetail from "../../../components/projects/ProjectDetail/ProjectDetail";
 
 // "async" means this function can use "await" inside it.
 // We need async here because params is a Promise and we must await it.

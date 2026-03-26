@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import connect from "@/lib/db";
 import { findAllBlogs, findBlogBySlug } from "@/server-services/blogServices";
 import Blog from "@/models/blog";
+import Activity from "@/models/activity";
+
 import { uploadToImgBB } from "@/utils/uploadToImgBB";
 
 //controller to get All Blogs
@@ -62,7 +64,7 @@ export interface BlogType {
 }
 
 //controller to create the blog
-export async function createBlog(request: NextRequest) {
+export async function createBlog(request: NextRequest, username: string) {
   try {
     await connect();
 
@@ -109,6 +111,14 @@ export async function createBlog(request: NextRequest) {
       slug,
     });
 
+    //here we are logging the activity
+    await Activity.create({
+      user: username,
+      action: "created",
+      resource: "blog",
+      title: blog.title,
+    });
+
     return NextResponse.json(
       {
         message: "Blog created successfully",
@@ -130,7 +140,11 @@ export async function createBlog(request: NextRequest) {
 }
 
 //controller to update the blog
-export async function updateBlog(request: NextRequest, slug: string) {
+export async function updateBlog(
+  request: NextRequest,
+  slug: string,
+  username: string,
+) {
   try {
     await connect();
 
@@ -184,6 +198,14 @@ export async function updateBlog(request: NextRequest, slug: string) {
     const blog = await Blog.findOneAndUpdate({ slug }, updateData, {
       new: true,
       runValidators: true,
+    });
+
+    //logging the activity
+    await Activity.create({
+      user: username,
+      action: "updated",
+      resource: "blog",
+      title: blog.title,
     });
 
     return NextResponse.json(

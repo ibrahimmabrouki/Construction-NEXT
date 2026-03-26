@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { insertInquiry } from "@/server-services/inquiryServices";
 import connect from "@/lib/db";
 import Inquiry from "@/models/inquiry";
+import Activity from "@/models/activity";
 
 interface InquiryData {
   name: string;
@@ -55,7 +56,11 @@ export async function getAllInquiries(request: NextRequest) {
 }
 
 //controller to make the inquiry viewed
-export async function updateInquiry(request: NextRequest, id: string) {
+export async function updateInquiry(
+  request: NextRequest,
+  id: string,
+  username: string,
+) {
   try {
     await connect();
     if (!id) {
@@ -83,6 +88,13 @@ export async function updateInquiry(request: NextRequest, id: string) {
       );
     }
 
+    await Activity.create({
+      user: username,
+      action: "reviewed",
+      resource: "inquiry",
+      title: updatedInquiry.name,
+    });
+
     return NextResponse.json(
       {
         message: "Inquiry updated successfully",
@@ -99,7 +111,11 @@ export async function updateInquiry(request: NextRequest, id: string) {
 }
 
 //controller to delete the inquiry
-export async function deleteInquiry(request: NextRequest, id: string) {
+export async function deleteInquiry(
+  request: NextRequest,
+  id: string,
+  username: string,
+) {
   try {
     if (!id) {
       return NextResponse.json(
@@ -117,6 +133,13 @@ export async function deleteInquiry(request: NextRequest, id: string) {
         { status: 404 },
       );
     }
+
+    await Activity.create({
+      user: username,
+      action: "deleted",
+      resource: "inquiry",
+      title: deletedInquiry.name,
+    });
 
     return NextResponse.json(
       {

@@ -23,7 +23,7 @@ export async function getAllRoles(request: NextRequest) {
     await connect();
 
     const roles = await Role.find();
-    return NextResponse.json({ success: true, roles });
+    return NextResponse.json({ success: true, data: roles });
   } catch (error) {
     return NextResponse.json(
       { success: false, message: "Error fetching roles" },

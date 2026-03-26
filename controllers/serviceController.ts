@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import connect from "@/lib/db";
 import { findAllServices } from "@/server-services/serviceServices";
 import Service from "@/models/services";
+import Activity from "@/models/activity";
 
 //controller to get all services
 export async function getAllServices(request: Request) {
@@ -41,7 +42,7 @@ interface ServiceType {
 }
 
 //method to create the service.
-export async function createService(request: NextRequest) {
+export async function createService(request: NextRequest, username: string) {
   try {
     const body: ServiceType = await request.json();
 
@@ -69,6 +70,12 @@ export async function createService(request: NextRequest) {
       );
     }
 
+    await Activity.create({
+      user: username,
+      action: "created",
+      resource: "service",
+      title: service.title,
+    });
     return NextResponse.json(
       {
         message: "Service created successfully",
@@ -90,7 +97,11 @@ export async function createService(request: NextRequest) {
 }
 
 //method to update the service.
-export async function updateService(request: NextRequest, id: string) {
+export async function updateService(
+  request: NextRequest,
+  id: string,
+  username: string,
+) {
   try {
     const body: ServiceType = await request.json();
 
@@ -115,6 +126,12 @@ export async function updateService(request: NextRequest, id: string) {
       );
     }
 
+    await Activity.create({
+      user: username,
+      action: "updated",
+      resource: "service",
+      title: updatedService.title,
+    });
     return NextResponse.json(
       {
         message: "Service updated successfully",
@@ -136,7 +153,11 @@ export async function updateService(request: NextRequest, id: string) {
 }
 
 //method to delete a service
-export async function deleteService(request: NextRequest, id: string) {
+export async function deleteService(
+  request: NextRequest,
+  id: string,
+  username: string,
+) {
   try {
     if (!id) {
       return NextResponse.json(
@@ -155,6 +176,12 @@ export async function deleteService(request: NextRequest, id: string) {
       );
     }
 
+    await Activity.create({
+      user: username,
+      action: "deleted",
+      resource: "service",
+      title: deletedService.title,
+    });
     return NextResponse.json(
       {
         message: "Service deleted successfully",

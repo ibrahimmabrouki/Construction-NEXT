@@ -16,13 +16,18 @@ const UserSchema = new Schema(
 
     roles: {
       type: [String],
-      enum: ["admin", "projecteditor", "blogeditor", "newseditor", "manager"],
       required: true,
     },
   },
   { timestamps: true },
 );
 
+// delete models.User;
+// const User = model("User", UserSchema);
+
 const User = models.User || model("User", UserSchema);
 
 export default User;
+
+
+

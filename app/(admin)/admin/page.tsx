@@ -1,4 +1,4 @@
-import AdminDashboard from "../../components/admin/adminDashboard/AdminDashboard";
+import AdminDashboard from "../../components/admin/adminDashboard/AdminDashboardServer";
 
 export default function AdminPage() {
   console.log("Admin dashboad loaded ")

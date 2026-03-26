@@ -1,6 +1,8 @@
 import styles from "./services.module.css";
 import SectionHeading from "../ui/SectionHeading/SectionHeading";
 import { ICON_MAP, IconName } from "@/lib/iconMap";
+import { Suspense } from "react";
+import Loader from "../ui/Loader/Loader";
 
 //Type
 type Service = {
@@ -8,7 +10,6 @@ type Service = {
   title: string;
   desc: string;
 };
-
 
 //Fetch
 export async function getAllServices(): Promise<Service[]> {
@@ -21,9 +22,7 @@ export async function getAllServices(): Promise<Service[]> {
   return data.services ?? [];
 }
 
-export default async function Services() {
-  const services = await getAllServices();
-
+export default function Services() {
   return (
     <main className="page">
       <section className={styles.section}>
@@ -35,20 +34,40 @@ export default async function Services() {
           />
         </div>
 
-        <div className={styles.grid}>
-          {services.map((s) => {
-            const Icon = ICON_MAP[s.icon];
-
-            return (
-              <div className={styles.card} key={s.title}>
-                {Icon && <Icon className={styles.icon} />}
-                <h3 className={styles.title}>{s.title}</h3>
-                <p className={styles.description}>{s.desc}</p>
-              </div>
-            );
-          })}
+        <div style={{ position: "relative" }}>
+          <Suspense
+            fallback={
+              <Loader
+                loading={true}
+                message="Loading services..."
+                variant="overlay"
+              />
+            }
+          >
+            <ServicesList />
+          </Suspense>
         </div>
       </section>
     </main>
+  );
+}
+
+async function ServicesList() {
+  const services = await getAllServices();
+
+  return (
+    <div className={styles.grid}>
+      {services.map((s) => {
+        const Icon = ICON_MAP[s.icon];
+
+        return (
+          <div className={styles.card} key={s.title}>
+            {Icon && <Icon className={styles.icon} />}
+            <h3 className={styles.title}>{s.title}</h3>
+            <p className={styles.description}>{s.desc}</p>
+          </div>
+        );
+      })}
+    </div>
   );
 }

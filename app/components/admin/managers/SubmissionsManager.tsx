@@ -7,6 +7,9 @@ import {
   getAllInquires,
   reviewInquiry,
 } from "@/client-services/inquiry";
+import { useAuthStore } from "../../../store/auth";
+import { wait } from "@/utils/delay";
+import Loader from "../../ui/Loader/Loader";
 
 interface InquiryDataRecieved {
   _id: string;
@@ -47,7 +50,13 @@ interface InquiryDataRecieved {
 // ];
 
 export default function SubmissionsManager() {
+  const hasAccess = useAuthStore((s) => s.hasAccess);
+  const updateAccess = hasAccess("blogs", "update");
+  const deleteAccess = hasAccess("blogs", "delete");
+
   const [submissions, setSubmissions] = useState<InquiryDataRecieved[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
 
   const markReviewed = (_id: string) => {
     setSubmissions(
@@ -63,12 +72,20 @@ export default function SubmissionsManager() {
         console.error("Invalid inquiry ID");
         return;
       }
-
+      setLoadingMessage("Updating inquiry status...");
+      setLoading(true);
+      const start = Date.now();
       const updated = await reviewInquiry(_id);
 
       setSubmissions((prev) => prev.map((s) => (s._id === _id ? updated : s)));
+      const elapsed = Date.now() - start;
+      if (elapsed < 1000) {
+        await wait(1000 - elapsed);
+      }
     } catch (error) {
       console.error("Failed to review inquiry:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -78,12 +95,20 @@ export default function SubmissionsManager() {
         console.error("Invalid inquiry ID");
         return;
       }
-
+      setLoadingMessage("Deleting inquiry...");
+      setLoading(true);
+      const start = Date.now();
       const deleted = await deleteInquiry(_id);
 
       setSubmissions((prev) => prev.filter((s) => s._id !== deleted._id));
+      const elapsed = Date.now() - start;
+      if (elapsed < 1000) {
+        await wait(1000 - elapsed);
+      }
     } catch (error) {
       console.error("Failed to delete inquiry:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -91,70 +116,86 @@ export default function SubmissionsManager() {
   useEffect(() => {
     const fetchInquiries = async () => {
       try {
+        setLoadingMessage("Loading serices...");
+        setLoading(true);
+        const start = Date.now();
         const response = await getAllInquires();
         setSubmissions(response);
+        const elapsed = Date.now() - start;
+        if (elapsed < 1000) {
+          await wait(1000 - elapsed);
+        }
       } catch (error) {
         console.error("Failed to fetch inquiries:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchInquiries();
   }, []);
 
   return (
-    <div className={styles.manager}>
-      <div className={styles.header}>
-        <h2>Submissions</h2>
-      </div>
+    <>
+      <Loader loading={loading} message={loadingMessage} variant="overlay" />
 
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Budget</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {submissions.map((s) => (
-              <tr key={s._id}>
-                <td>{s.name}</td>
-                <td style={{ color: "#666" }}>{s.email}</td>
-                <td>{s.budget}</td>
-                <td style={{ color: "#888" }}>{s.date}</td>
-                <td>
-                  <span
-                    className={`${styles.badge} ${s.status === "Reviewed" ? styles.Completed : styles.InProgress}`}
-                  >
-                    {s.status}
-                  </span>
-                </td>
-                <td>
-                  <div className={styles.actions}>
-                    {s.status === "New" && (
-                      <button
-                        className={styles.editBtn}
-                        onClick={() => handleReview(s._id)}
-                      >
-                        Mark Reviewed
-                      </button>
-                    )}
-                    <button
-                      className={styles.deleteBtn}
-                      onClick={() => handleDelete(s._id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
+      <div className={styles.manager}>
+        <div className={styles.header}>
+          <h2>Submissions</h2>
+        </div>
+
+        <div className={styles.tableWrapper}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Budget</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {submissions.map((s) => (
+                <tr key={s._id}>
+                  <td>{s.name}</td>
+                  <td style={{ color: "#666" }}>{s.email}</td>
+                  <td>{s.budget}</td>
+                  <td style={{ color: "#888" }}>{s.date}</td>
+                  <td>
+                    <span
+                      className={`${styles.badge} ${s.status === "Reviewed" ? styles.Completed : styles.InProgress}`}
+                    >
+                      {s.status}
+                    </span>
+                  </td>
+                  <td>
+                    <div className={styles.actions}>
+                      {s.status === "New" && (
+                          <button
+                            className={styles.editBtn}
+                            onClick={() => handleReview(s._id)}
+                          >
+                            Mark Reviewed
+                          </button>
+                        ) &&
+                        updateAccess}
+                      {deleteAccess && (
+                        <button
+                          className={styles.deleteBtn}
+                          onClick={() => handleDelete(s._id)}
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

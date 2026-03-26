@@ -1,6 +1,20 @@
 import { NextResponse } from "next/server";
 import connect from "@/lib/db";
 import { FindExistingUser } from "@/server-services/authServices";
+import Role from "@/models/roles";
+
+type Action = "create" | "read" | "update" | "delete";
+
+type Permission = {
+  resource: string;
+  actions: Action[];
+};
+
+type Role = {
+  name: string;
+  _id: string;
+  permissions: Permission[];
+};
 
 //logging in into the rolebased admin dashboard.
 export async function Login(request: Request) {
@@ -27,10 +41,26 @@ export async function Login(request: Request) {
       );
     }
 
+    let full_Roles: Role[] = [];
+    const roleIds: string[] = existingUser.roles;
+
+    full_Roles = await Role.find({
+      _id: { $in: roleIds },
+    }).lean();
+
+    full_Roles = full_Roles.map((r: any) => ({
+      name: r.name,
+      _id: r._id.toString(),
+      permissions: r.permissions.map((p: any) => ({
+        resource: p.resource,
+        actions: [...p.actions],
+      })),
+    }));
+
     const sessionData = {
       userId: existingUser._id,
       username: existingUser.username,
-      roles: existingUser.roles,
+      roles: full_Roles,
     };
 
     const response = NextResponse.json({ success: true });
@@ -56,7 +86,7 @@ export async function logout() {
 
   response.cookies.set("session", "", {
     httpOnly: true,
-    expires: new Date(0), // ✅ delete cookie
+    expires: new Date(0), 
     path: "/",
   });
 

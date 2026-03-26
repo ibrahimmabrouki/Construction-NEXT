@@ -2,6 +2,7 @@ import styles from "./Blog.module.css";
 import SectionHeading from "../../ui/SectionHeading/SectionHeading";
 import { Suspense } from "react";
 import BlogList from "../blogList/BlogList";
+import Loader from "../../ui/Loader/Loader";
 
 export default function Blog() {
   const LoadingPostsTSX = (
@@ -16,7 +17,11 @@ export default function Blog() {
           description="Perspectives on luxury construction, design trends, and smart living."
         />
       </section>
-      <Suspense fallback={LoadingPostsTSX}>
+      <Suspense
+        fallback={
+          <Loader loading={true} message="Loading posts..." variant="overlay" />
+        }
+      >
         <BlogList />
       </Suspense>
     </main>

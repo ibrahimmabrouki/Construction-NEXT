@@ -9,6 +9,9 @@ import {
   getAllProjectAdmin,
   updateProject,
 } from "@/client-services/projects";
+import { useAuthStore } from "../../../store/auth";
+import { wait } from "@/utils/delay";
+import Loader from "../../ui/Loader/Loader";
 
 interface Project {
   slug: string;
@@ -110,6 +113,11 @@ const statusClass: Record<string, string> = {
 };
 
 export default function ProjectsManager() {
+  const hasAccess = useAuthStore((s) => s.hasAccess);
+  const createAccess = hasAccess("blogs", "create");
+  const updateAccess = hasAccess("blogs", "update");
+  const deleteAccess = hasAccess("blogs", "delete");
+
   // this use state is the state that will hold all the projects and filled when the admin logs in
   // it will updated in case the admin make and of the CRUD operations on the database.
   const [projects, setProjects] = useState<Project[]>([]);
@@ -134,7 +142,8 @@ export default function ProjectsManager() {
   // holds the actual File objects for new uploads
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -142,8 +151,17 @@ export default function ProjectsManager() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
+        setLoadingMessage("Loading projects...");
+        setLoading(true);
+        const start = Date.now();
+
         const data = await getAllProjectAdmin();
         setProjects(data);
+
+        const elapsed = Date.now() - start;
+        if (elapsed < 1000) {
+          await wait(1000 - elapsed);
+        }
       } catch (error) {
         console.error("Failed to fetch projects:", error);
       } finally {
@@ -208,6 +226,9 @@ export default function ProjectsManager() {
 
     try {
       if (editSlug !== null) {
+        setLoadingMessage("Updating project...");
+        setLoading(true);
+        const start = Date.now();
         const updated = await updateProject(
           {
             title: form.title,
@@ -225,7 +246,14 @@ export default function ProjectsManager() {
         setProjects((prev) =>
           prev.map((p) => (p.slug === editSlug ? updated : p)),
         );
+        const elapsed = Date.now() - start;
+        if (elapsed < 1000) {
+          await wait(1000 - elapsed);
+        }
       } else {
+        setLoadingMessage("Creating project...");
+        setLoading(true);
+        const start = Date.now();
         const created = await createProject({
           title: form.title,
           location: form.location,
@@ -237,6 +265,10 @@ export default function ProjectsManager() {
         });
 
         setProjects((prev) => [...prev, created]);
+        const elapsed = Date.now() - start;
+        if (elapsed < 1000) {
+          await wait(1000 - elapsed);
+        }
       }
 
       setForm(empty);
@@ -248,10 +280,16 @@ export default function ProjectsManager() {
     } catch (error) {
       console.error(error);
       alert("Operation failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleEdit = (p: Project) => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
     setForm({ ...p });
     setEditSlug(p.slug);
     // show existing image URLs as previews
@@ -265,11 +303,22 @@ export default function ProjectsManager() {
     if (!confirm("Delete this project?")) return;
 
     try {
+      setLoadingMessage("Updating project...");
+      setLoading(true);
+      const start = Date.now();
+
       await deleteProject(slug);
+
       setProjects((prev) => prev.filter((p) => p.slug !== slug));
+      const elapsed = Date.now() - start;
+      if (elapsed < 1000) {
+        await wait(1000 - elapsed);
+      }
     } catch (error) {
       console.error(error);
       alert("Delete failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -283,253 +332,279 @@ export default function ProjectsManager() {
   };
 
   return (
-    <div className={styles.manager}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div>
-          <h2 className={styles.title}>Projects</h2>
-          <p className={styles.subtitle}>{projects.length} total</p>
+    <>
+      <Loader loading={loading} message={loadingMessage} variant="overlay" />
+      <div className={styles.manager}>
+        {/* Header */}
+        <div className={styles.header}>
+          <div>
+            <h2 className={styles.title}>Projects</h2>
+            <p className={styles.subtitle}>{projects.length} total</p>
+          </div>
+
+          {/* this the button at the top corner intillay its text is + Add Project when the user clicks => the admin wants to post new project 
+        so it should changed into cancel */}
+          {createAccess && (
+            <button
+              className={styles.addBtn}
+              onClick={() => {
+                //if the form is shown even if we are editing the project or creating new project post we need to handle the cancel
+                if (
+                  (showForm && editSlug === null) ||
+                  (showForm && editSlug !== null)
+                ) {
+                  handleCancelForm();
+                } else {
+                  setShowForm(true); //show the form
+                  setEditSlug(null); //set the slug to null since the admin clicked on + Add Projec
+                  setForm(empty); //setting the from to have the default values
+                  setImagePreviews([]); //setting the images links to null
+                  setSelectedFiles([]); //also the selected files are null
+                  setButtonText("Cancel");
+                }
+              }}
+            >
+              {buttonText}
+            </button>
+          )}
         </div>
 
-        {/* this the button at the top corner intillay its text is + Add Project when the user clicks => the admin wants to post new project 
-        so it should changed into cancel */}
-        <button
-          className={styles.addBtn}
-          onClick={() => {
-            //if the form is shown even if we are editing the project or creating new project post we need to handle the cancel
-            if (
-              (showForm && editSlug === null) ||
-              (showForm && editSlug !== null)
-            ) {
-              handleCancelForm();
-            } else {
-              setShowForm(true); //show the form
-              setEditSlug(null); //set the slug to null since the admin clicked on + Add Projec
-              setForm(empty); //setting the from to have the default values
-              setImagePreviews([]); //setting the images links to null
-              setSelectedFiles([]); //also the selected files are null
-              setButtonText("Cancel");
-            }
-          }}
-        >
-          {buttonText}
-        </button>
-      </div>
+        {/* Form */}
+        {showForm && (
+          <div className={styles.form}>
+            {/* if we are editing exiting project then we need to show Edit Porject otherwise it is new "Project" */}
+            <h3>{editSlug !== null ? "Edit Project" : "New Project"}</h3>
 
-      {/* Form */}
-      {showForm && (
-        <div className={styles.form}>
-          {/* if we are editing exiting project then we need to show Edit Porject otherwise it is new "Project" */}
-          <h3>{editSlug !== null ? "Edit Project" : "New Project"}</h3>
+            <div className={styles.fields}>
+              <div className={styles.fieldGroup}>
+                <label>Title *</label>
+                <input
+                  placeholder="e.g. Villa Azure"
+                  value={form.title} //getting the values from the form so incase we are editing throught the handleEdit we are setting the
+                  //form to be the passed project, so we display the old values otherwise the form is set to empty when the user clicks the + Add Project
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                />
+              </div>
 
-          <div className={styles.fields}>
-            <div className={styles.fieldGroup}>
-              <label>Title *</label>
-              <input
-                placeholder="e.g. Villa Azure"
-                value={form.title} //getting the values from the form so incase we are editing throught the handleEdit we are setting the
-                //form to be the passed project, so we display the old values otherwise the form is set to empty when the user clicks the + Add Project
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-              />
-            </div>
+              <div className={styles.fieldGroup}>
+                <label>Location *</label>
+                <input
+                  placeholder="e.g. Marbella, Spain"
+                  value={form.location} //similar to title above
+                  onChange={(e) =>
+                    setForm({ ...form, location: e.target.value })
+                  }
+                />
+              </div>
 
-            <div className={styles.fieldGroup}>
-              <label>Location *</label>
-              <input
-                placeholder="e.g. Marbella, Spain"
-                value={form.location} //similar to title above
-                onChange={(e) => setForm({ ...form, location: e.target.value })}
-              />
-            </div>
+              <div className={styles.fieldGroup}>
+                <label>Price</label>
+                <input
+                  placeholder="e.g. €2.4M"
+                  value={form.price} //similar to title above
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                />
+              </div>
 
-            <div className={styles.fieldGroup}>
-              <label>Price</label>
-              <input
-                placeholder="e.g. €2.4M"
-                value={form.price} //similar to title above
-                onChange={(e) => setForm({ ...form, price: e.target.value })}
-              />
-            </div>
-
-            <div className={styles.fieldGroup}>
-              <label>Style</label>
-              <select
-                value={form.style} //similar to title above
-                onChange={(e) => setForm({ ...form, style: e.target.value })}
-              >
-                {styleOptions.map((s) => (
-                  <option key={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.fieldGroup}>
-              <label>Status</label>
-              <select
-                value={form.status} //similar to title above
-                onChange={(e) => setForm({ ...form, status: e.target.value })}
-              >
-                {statusOptions.map((s) => (
-                  <option key={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Description — full width */}
-            <div className={styles.fieldGroup} style={{ gridColumn: "span 2" }}>
-              <label>Description *</label>
-              <textarea
-                placeholder="Describe the project..."
-                value={form.description} //similar to title above
-                onChange={(e) =>
-                  setForm({ ...form, description: e.target.value })
-                }
-                rows={4}
-              />
-            </div>
-
-            {/* Images upload — full width */}
-            <div className={styles.fieldGroup} style={{ gridColumn: "span 2" }}>
-              <label>Project Images * ({imagePreviews.length} selected)</label>
-
-              {/* Existing + new image previews */}
-              {/* incase we have images we are going to display them in the grid */}
-              {imagePreviews.length > 0 && (
-                // grid container to display the images
-                <div className={styles.previewGrid}>
-                  {imagePreviews.map((src, i) => (
-                    <div key={i} className={styles.previewItem}>
-                      <div className={styles.previewImageWrap}>
-                        <Image
-                          src={src}
-                          alt={`Preview ${i + 1}`}
-                          fill
-                          className={styles.previewImage}
-                          unoptimized
-                        />
-                        {/*display the word cover for the first iamge which is the cover image*/}
-                        {i === 0 && (
-                          <span className={styles.coverBadge}>Cover</span>
-                        )}
-                      </div>
-                      {/* remove button */}
-                      <button
-                        className={styles.removeImageBtn}
-                        onClick={() => removeImage(i)}
-                        type="button"
-                      >
-                        ✕
-                      </button>
-                    </div>
+              <div className={styles.fieldGroup}>
+                <label>Style</label>
+                <select
+                  value={form.style} //similar to title above
+                  onChange={(e) => setForm({ ...form, style: e.target.value })}
+                >
+                  {styleOptions.map((s) => (
+                    <option key={s}>{s}</option>
                   ))}
+                </select>
+              </div>
 
-                  {/* this will be also displayed inside the same Grid inorder to allow the user to add more images incase they want*/}
+              <div className={styles.fieldGroup}>
+                <label>Status</label>
+                <select
+                  value={form.status} //similar to title above
+                  onChange={(e) => setForm({ ...form, status: e.target.value })}
+                >
+                  {statusOptions.map((s) => (
+                    <option key={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Description — full width */}
+              <div
+                className={styles.fieldGroup}
+                style={{ gridColumn: "span 2" }}
+              >
+                <label>Description *</label>
+                <textarea
+                  placeholder="Describe the project..."
+                  value={form.description} //similar to title above
+                  onChange={(e) =>
+                    setForm({ ...form, description: e.target.value })
+                  }
+                  rows={4}
+                />
+              </div>
+
+              {/* Images upload — full width */}
+              <div
+                className={styles.fieldGroup}
+                style={{ gridColumn: "span 2" }}
+              >
+                <label>
+                  Project Images * ({imagePreviews.length} selected)
+                </label>
+
+                {/* Existing + new image previews */}
+                {/* incase we have images we are going to display them in the grid */}
+                {imagePreviews.length > 0 && (
+                  // grid container to display the images
+                  <div className={styles.previewGrid}>
+                    {imagePreviews.map((src, i) => (
+                      <div key={i} className={styles.previewItem}>
+                        <div className={styles.previewImageWrap}>
+                          <Image
+                            src={src}
+                            alt={`Preview ${i + 1}`}
+                            fill
+                            className={styles.previewImage}
+                            unoptimized
+                          />
+                          {/*display the word cover for the first iamge which is the cover image*/}
+                          {i === 0 && (
+                            <span className={styles.coverBadge}>Cover</span>
+                          )}
+                        </div>
+                        {/* remove button */}
+                        <button
+                          className={styles.removeImageBtn}
+                          onClick={() => removeImage(i)}
+                          type="button"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+
+                    {/* this will be also displayed inside the same Grid inorder to allow the user to add more images incase they want*/}
+                    <div
+                      className={styles.addMoreWrap}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <span className={styles.addMoreIcon}>+</span>
+                      <span className={styles.addMoreText}>Add more</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* when ther are no images or the user deleted all the images this how will the upload images look like */}
+                {imagePreviews.length === 0 && (
                   <div
-                    className={styles.addMoreWrap}
+                    className={styles.uploadArea}
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <span className={styles.addMoreIcon}>+</span>
-                    <span className={styles.addMoreText}>Add more</span>
+                    <div className={styles.uploadPlaceholder}>
+                      <div className={styles.uploadIcon}>↑</div>
+                      <p className={styles.uploadText}>
+                        Click to upload images
+                      </p>
+                      <p className={styles.uploadHint}>
+                        Select multiple — JPG, PNG, WEBP up to 10MB each
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* when ther are no images or the user deleted all the images this how will the upload images look like */}
-              {imagePreviews.length === 0 && (
-                <div
-                  className={styles.uploadArea}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <div className={styles.uploadPlaceholder}>
-                    <div className={styles.uploadIcon}>↑</div>
-                    <p className={styles.uploadText}>Click to upload images</p>
-                    <p className={styles.uploadHint}>
-                      Select multiple — JPG, PNG, WEBP up to 10MB each
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Hidden file input — multiple allowed */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleImagesChange}
-                style={{ display: "none" }}
-              />
-
-              <p className={styles.uploadNote}>
-                First image is used as the cover on the projects listing page.
-              </p>
-            </div>
-          </div>
-
-          {!editSlug && form.title && (
-            <p className={styles.slugPreview}>
-              Slug: <code>/projects/{slugify(form.title)}</code>
-            </p>
-          )}
-
-          <div className={styles.formActions}>
-            <button className={styles.saveBtn} onClick={handleSubmit}>
-              {editSlug !== null ? "Save Changes" : "Create Project"}
-            </button>
-            <button className={styles.cancelBtn} onClick={handleCancelForm}>
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Project rows — only first image shown */}
-      <div className={styles.list}>
-        {projects.map((p) => (
-          <div key={p.slug} className={styles.row}>
-            {/* Only first image displayed in the list */}
-            <div className={styles.imageWrap}>
-              {p.images[0] && (
-                <Image
-                  src={p.images[0]}
-                  alt={p.title}
-                  fill
-                  className={styles.image}
+                {/* Hidden file input — multiple allowed */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImagesChange}
+                  style={{ display: "none" }}
                 />
-              )}
-              {/* image count badge if more than 1 */}
-              {p.images.length > 1 && (
-                <span className={styles.imageCount}>
-                  +{p.images.length - 1}
-                </span>
-              )}
+
+                <p className={styles.uploadNote}>
+                  First image is used as the cover on the projects listing page.
+                </p>
+              </div>
             </div>
 
-            <div className={styles.info}>
-              <p className={styles.projectTitle}>{p.title}</p>
-              <p className={styles.projectLocation}>{p.location}</p>
-            </div>
+            {!editSlug && form.title && (
+              <p className={styles.slugPreview}>
+                Slug: <code>/projects/{slugify(form.title)}</code>
+              </p>
+            )}
 
-            <p className={styles.locationCol}>{p.location}</p>
-
-            <span className={`${styles.badge} ${statusClass[p.status] ?? ""}`}>
-              {p.status}
-            </span>
-
-            <div className={styles.actions}>
-              <button className={styles.editBtn} onClick={() => handleEdit(p)}>
-                Edit
+            <div className={styles.formActions}>
+              <button className={styles.saveBtn} onClick={handleSubmit}>
+                {editSlug !== null ? "Save Changes" : "Create Project"}
               </button>
-              <button
-                className={styles.deleteBtn}
-                onClick={() => handleDeleteProject(p.slug)}
-              >
-                Delete
+              <button className={styles.cancelBtn} onClick={handleCancelForm}>
+                Cancel
               </button>
             </div>
           </div>
-        ))}
+        )}
+
+        {/* Project rows — only first image shown */}
+        <div className={styles.list}>
+          {projects.map((p) => (
+            <div key={p.slug} className={styles.row}>
+              {/* Only first image displayed in the list */}
+              <div className={styles.imageWrap}>
+                {p.images[0] && (
+                  <Image
+                    src={p.images[0]}
+                    alt={p.title}
+                    fill
+                    className={styles.image}
+                  />
+                )}
+                {/* image count badge if more than 1 */}
+                {p.images.length > 1 && (
+                  <span className={styles.imageCount}>
+                    +{p.images.length - 1}
+                  </span>
+                )}
+              </div>
+
+              <div className={styles.info}>
+                <p className={styles.projectTitle}>{p.title}</p>
+                <p className={styles.projectLocation}>{p.location}</p>
+              </div>
+
+              <p className={styles.locationCol}>{p.price}</p>
+
+              <span
+                className={`${styles.badge} ${statusClass[p.status] ?? ""}`}
+              >
+                {p.status}
+              </span>
+
+              <div className={styles.actions}>
+                {updateAccess && (
+                  <button
+                    className={styles.editBtn}
+                    onClick={() => handleEdit(p)}
+                  >
+                    Edit
+                  </button>
+                )}
+                {deleteAccess && (
+                  <button
+                    className={styles.deleteBtn}
+                    onClick={() => handleDeleteProject(p.slug)}
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

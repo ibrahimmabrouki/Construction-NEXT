@@ -2,6 +2,9 @@ import { updateInquiry, deleteInquiry } from "@/controllers/inquiryController";
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateUser, authorizeRoles } from "@/middlewares/authMiddleware";
 
+//resource: ["projects", "blogs", "services", "users", "inquiries"];
+//Action = "create" | "read" | "update" | "delete";
+
 //route to update the inquiry from new to viewed.
 export const PATCH = async (
   request: NextRequest,
@@ -13,7 +16,10 @@ export const PATCH = async (
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const roleCheck = authorizeRoles(user, ["admin", "inquiryeditor", "manager"]);
+  const roleCheck = authorizeRoles(user, {
+    resource: "inquiries",
+    action: "update",
+  });
 
   if (roleCheck) {
     return roleCheck;
@@ -21,7 +27,7 @@ export const PATCH = async (
 
   const { id } = await params;
 
-  return updateInquiry(request, id);
+  return updateInquiry(request, id, user.username);
 };
 
 //route to delete the inquiry
@@ -35,7 +41,10 @@ export const DELETE = async (
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const roleCheck = authorizeRoles(user, ["admin", "inquiryeditor", "manager"]);
+  const roleCheck = authorizeRoles(user, {
+    resource: "inquiries",
+    action: "delete",
+  });
 
   if (roleCheck) {
     return roleCheck;
@@ -43,5 +52,5 @@ export const DELETE = async (
 
   const { id } = await params;
 
-  return deleteInquiry(request, id);
+  return deleteInquiry(request, id, user.username);
 };

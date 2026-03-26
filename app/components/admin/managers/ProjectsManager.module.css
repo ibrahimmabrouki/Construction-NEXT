@@ -9,7 +9,6 @@
   box-shadow: 0 2px 12px rgba(194, 160, 99, 0.06);
 }
 
-/* ── Header ── */
 .header {
   display: flex;
   align-items: center;
@@ -57,7 +56,6 @@
   opacity: 0.95;
 }
 
-/* ── Form ── */
 .form {
   padding: 24px 24px 20px;
   border-bottom: 1px solid rgba(194, 160, 99, 0.1);
@@ -120,7 +118,6 @@
   line-height: 1.6;
 }
 
-/* ── Upload area (empty state) ── */
 .uploadArea {
   border: 2px dashed rgba(194, 160, 99, 0.35);
   border-radius: 10px;
@@ -173,7 +170,6 @@
   margin: 0;
 }
 
-/* ── Image preview grid ── */
 .previewGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -321,7 +317,6 @@
   cursor: pointer;
 }
 
-/* ── Project list rows ── */
 .list {
   display: flex;
   flex-direction: column;
@@ -401,7 +396,6 @@
   flex-shrink: 0;
 }
 
-/* ── Status badges ── */
 .badge {
   display: inline-block;
   padding: 5px 14px;
@@ -430,7 +424,6 @@
   border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-/* ── Actions ── */
 .actions {
   display: flex;
   gap: 8px;
