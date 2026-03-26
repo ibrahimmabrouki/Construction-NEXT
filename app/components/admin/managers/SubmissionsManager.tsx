@@ -52,6 +52,7 @@ interface InquiryDataRecieved {
 export default function SubmissionsManager() {
   const hasAccess = useAuthStore((s) => s.hasAccess);
   const updateAccess = hasAccess("blogs", "update");
+  console.log(updateAccess);
   const deleteAccess = hasAccess("blogs", "delete");
 
   const [submissions, setSubmissions] = useState<InquiryDataRecieved[]>([]);
